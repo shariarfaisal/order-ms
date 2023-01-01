@@ -16,6 +16,13 @@ import (
 
 var db *gorm.DB
 
+func JSONMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Content-Type", "application/json")
+		c.Next()
+	}
+}
+
 func main() {
 	dsn := "host=localhost user=postgres password=admin dbname=orderms port=5432 sslmode=disable"
 	dbRes, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -23,7 +30,6 @@ func main() {
 		panic("failed to connect database")
 	}
 
-	
 	db = dbRes
 	order.Migration(db)
 	hub.Migration(db)
@@ -36,6 +42,8 @@ func main() {
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
+
+	r.Use(JSONMiddleware())
 
 	initRoutes(r)
 

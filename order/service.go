@@ -1,154 +1,116 @@
 package order
 
 import (
-	"net/http"
-	"reflect"
+	"errors"
+	"fmt"
+	"strconv"
+	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/shariarfaisal/order-ms/brand"
 	"github.com/shariarfaisal/order-ms/product"
-	"gorm.io/gorm"
 )
 
-/**
-Expected body data
-{
-	"platform": "web" | "app",
-	"rider_note": "string",
-	"items": [
-		{
-			"id": 1,
-			"quantity": 1,
-			"note": "string" // optional
-		}
-	],
-	"restaurant_note": "string", // optional
-	"address_id": number, // optional
-	"payment_method": "cash" | "bkash" | "ssl" | "aamarpay", // optional
-	"voucher": "string", // optional
-}
-*/ 
+func isValidItemsForOrder(items []OrderItemSchema, prods []product.Product) (bool, string) {
+	/*
+		- check products existence
+		- check products status
+		- check products inventory
+	*/
 
-type DTO struct {
-	Platform string `json:"platform" validate:"required"`
-	RiderNote string `json:"rider_note"`
-	Items [] struct {
-		Id int `json:"id" validate:"required"`
-		Quantity int `json:"quantity" validate:"required"`
-		Note string `json:"note"`
-	} `json:"items" validate:"required"`
-	RestaurantNote string `json:"restaurant_note"`
-	AddressId int `json:"address_id" validate:"required"`
-	PaymentMethod string `json:"payment_method" validate:"required"`
-	Voucher string `json:"voucher" validate:"required"`
-}
-
-/*
-	- Input data validation (required, type, length, etc)
-	- Write error messages for specific field
-*/
-
-func Validate (d *DTO) {
-	x := reflect.TypeOf(d)
-	for i := 0; i < x.NumField(); i++ {
-		println(x.Field(i).Tag.Get("validate"))
-		// if x.Field(i).Tag.Get("validate") == "required" {
-
-		// }
+	byId := map[int]product.Product{}
+	for _, prod := range prods {
+		byId[int(prod.ID)] = prod
 	}
+
+	for _, item := range items {
+		prod, ok := byId[item.Id]
+		if !ok || prod.Status != product.ProductStatusApproved {
+			return false, fmt.Sprintf("%s not found", prod.Name)
+		}
+
+		if !prod.IsAvailable {
+			return false, fmt.Sprintf("%s not available", prod.Name)
+		}
+
+		if prod.UseInventory && prod.Stock < item.Quantity {
+			return false, fmt.Sprintf("%s out of stock", prod.Name)
+		}
+	}
+
+	return true, ""
 }
 
-
-func createOrder(c *gin.Context) {
-	var params DTO
-	c.BindJSON(&params)
-
-	c.JSON(http.StatusOK, gin.H{"message": "Order Created", "data": params})
-
-	// validate params
-	
-
-	/**
-		- Input data validation (required, type, length, etc)
-		- Check customer validity (is customer exists, is customer active, etc)
-		- Check address validity (is address exists, is address valid etc)
-		- check operation status 
-	*/
-
-	/**
-		TODO: fetch products & products restaurant & Hub by items ids
-			- check products existence 
-			- check products status 
-			- check products inventory 
-			- check restaurant operating status
-			- check group restaurant validity
-			- Check hub order accepting or not 
-			- Check is order from multiple hub or not (validate)
-			- Calculate order items total price & discount
-		- Voucher Validation & calculate discount
-		- Get delivery charge
-		- Check payment Status 
-
-		TODO: Create Transaction
-			- Create Order
-			- Create Pickups
-			- Create Order Items
-			- Update inventory
-			- Update voucher info 
-			- Update Brands counter 
-			- Update Products counter
-
-		TODO: Send Notification
-			- Notify customer
-			- Notify restaurant
-			- Notify Operation
-	*/
-
-
-	// hubId := order.HubId
-	// _, err := hub.HubById(hubId)
-	// if err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
-
+func getOrderItems(params OrderSchema) ([]product.Product, error) {
+	items := params.Items
 	itemsId := []int{}
-	for _, item := range params.Items {
-		println(item.Quantity)
+	for _, item := range items {
 		itemsId = append(itemsId, item.Id)
 	}
 
-	prods := product.GetByIds(itemsId)
-	print(len(prods))
-
-
+	prods, err := product.GetByIds(itemsId)
+	if err != nil {
+		return nil, err
+	}
 	
+	_, errMsg := isValidItemsForOrder(items, prods)
+	if errMsg != "" {
+		return nil, errors.New(errMsg)
+	}
 
-	// orderObj := Order {
-	// 	Status: order.Status,
-	// 	Platform: order.Platform,
-	// 	DispatchTime: order.DispatchTime,
-	// 	RiderNote: order.RiderNote,
-	// 	HubId: order.HubId,
-	// 	EDT: order.EDT,
-	// 	PaymentMethod: order.PaymentMethod,
-	// 	PaymentStatus: order.PaymentStatus,
-	// 	Total: order.Total,
-	// 	Discount: order.Discount,
-	// 	ServiceCharge: order.ServiceCharge,
-	// 	ItemsValue: order.ItemsValue,
-	// 	ItemDiscount: order.ItemDiscount,
-	// 	PromoDiscount: order.PromoDiscount,
-	// }
-
-	db.Transaction(func (tx *gorm.DB) error {
-
-		// create order 
-		// create pickups 
-		// create order items
-
-		return nil
-	})
-
-	c.JSON(http.StatusOK, gin.H{"message": "Order Created"})
+	return prods,nil 
 }
 
+
+func InBetweenHours (start /* start hour */, end /* end hour*/, hour, minute float32) bool {
+	if minute > 0 {
+		hour += minute / 100
+	}
+
+	if start < end {
+		return start <= hour && end >= hour
+	} else {
+		return start <= hour || end >= hour
+	}
+}
+
+func isBrandsOperating(brands []brand.Brand) (bool, string) {
+
+	for _, item := range brands {
+		if item.Status != brand.BrandStatusActive {
+			return false, fmt.Sprintf("%s is not operating", item.Name)
+		}
+
+		if !item.IsAvailable {
+			return false, fmt.Sprintf("%s is not operating", item.Name)
+		}
+
+		opTime := item.OperatingTimes
+
+		if len(opTime) > 0 {
+			day := time.Now().Day()
+	
+			times, exists := opTime[strconv.Itoa(day)]
+			if !exists {
+				return false, fmt.Sprintf("%s is not operating", item.Name)
+			}
+			
+			hour := float32(time.Now().Hour())
+			minute := float32(time.Now().Minute())
+			isOperating := false
+			for _, t := range times.([]brand.OperatingTime) {
+				from := t.From.Hour + t.From.Minute / 100
+				to := t.To.Hour + t.To.Minute / 100
+				if InBetweenHours(float32(from), float32(to), hour, minute) {
+					isOperating = true
+					break
+				}
+			}
+	
+			if !isOperating {
+				return false, fmt.Sprintf("%s is not operating", item.Name)
+			}
+		}
+	}
+
+	return true, ""
+}

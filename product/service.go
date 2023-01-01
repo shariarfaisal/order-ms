@@ -1,7 +1,12 @@
 package product
 
-func GetByIds(ids []int) []Product {
+import "github.com/gin-gonic/gin"
+
+func getProducts(c *gin.Context) {
 	var products []Product
-	db.Raw("select p.name, p.price, b.name, b.status,  from products as p inner join brands as b on p.id in (?)", ids).Scan(&products)
-	return products
+	if er := db.Find(&products).Error; er != nil {
+		c.JSON(500, gin.H{"error": er.Error()})
+		return
+	}
+	c.JSON(200, products)
 }

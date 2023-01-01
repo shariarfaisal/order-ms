@@ -9,12 +9,12 @@ var db *gorm.DB
 
 func Routes(database *gorm.DB, r *gin.Engine) {
 	db = database
-	// hub := r.Group("/hub")
-	// {
-	// 	hub.GET("/", getHubs)
-	// 	hub.GET("/:id", getHub)
-	// 	hub.POST("/", createHub)
-	// 	hub.PUT("/:id", updateHub)
-	// 	hub.DELETE("/:id", deleteHub)
-	// }
+	hr := r.Group("/hub")
+	{
+		hr.GET("/", getMany)
+		hr.GET("/:id", getById)
+		hr.POST("/create", createHub)
+		// hr.PUT("/:id", updateHub)
+		// hr.DELETE("/:id", deleteHub)
+	}
 }
