@@ -1,6 +1,6 @@
 package brand
 
-func GetPartnerById(id int) (partner Partner, err error) {
+func GetPartnerById(id uint) (partner Partner, err error) {
 	err = db.First(&partner, id).Error
 	return partner, err
 }
@@ -15,22 +15,22 @@ func GetBrandMany() (brands []Brand, err error) {
 	return brands, err
 }
 
-func GetBrandById(id int) (brand Brand, err error) {
+func GetBrandById(id uint) (brand Brand, err error) {
 	err = db.First(&brand, id).Error
 	return brand, err
 }
 
-func GetCategoryById(id int) (category BrandCategory, err error) {
+func GetCategoryById(id uint) (category BrandCategory, err error) {
 	err = db.First(&category, id).Error
 	return category, err
 }
 
-func GetBrandByNameAndPartnerId(name string, partnerId int) (brand Brand, err error) {
+func GetBrandByNameAndPartnerId(name string, partnerId uint) (brand Brand, err error) {
 	err = db.Where("name = ? AND partner_id = ?", name, partnerId).First(&brand).Error
 	return brand, err
 }
 
-func GetCategoryByCategoryId(id int) (category BrandCategory, err error) {
+func GetCategoryByCategoryId(id uint) (category BrandCategory, err error) {
 	err = db.Where("category_id = ?", id).First(&category).Error
 	return category, err
 }

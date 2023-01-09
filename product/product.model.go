@@ -3,6 +3,7 @@ package product
 import (
 	"time"
 
+	"github.com/lib/pq"
 	"github.com/shariarfaisal/order-ms/brand"
 	"gorm.io/gorm"
 )
@@ -34,20 +35,22 @@ type Product struct {
 	ID        uint `json:"id" gorm:"primarykey"`
 	Type ProductType `json:"type"`
 	Name        string `json:"name"`
-	CategoryId int `json:"categoryId" gorm:"index"`
+	CategoryId uint `json:"categoryId" gorm:"index"`
 	Category brand.BrandCategory `json:"category,omitempty" gorm:"foreignKey:CategoryId"`
 	Slug 	  string `json:"slug"`
-	Images 	 []string `json:"image,omitempty" gorm:"type:jsonb"`
+	Images 	 pq.StringArray `json:"image,omitempty" gorm:"type:text[]"`
 	Details    string `json:"details"`
 	Price float32 `json:"price"`
 	Status 	  ProductStatus `json:"status"`
-	BrandId int `json:"brandId" gorm:"index"`
+	BrandId uint `json:"brandId" gorm:"index"`
 	Brand brand.Brand `json:"brand,omitempty" gorm:"foreignKey:BrandId"`
 	IsAvailable bool `json:"isAvailable"`
 	UseInventory bool `json:"useInventory"`
 	InventoryType InventoryType `json:"inventoryType"`
 	Stock int `json:"stock"`
-	Variants []ProductVariant `json:"variants,omitempty" gorm:"foreignKey:ProductId"`
+	Variants []*ProductVariant `json:"variants,omitempty" gorm:"foreignKey:ProductId"`
+	VariantId uint `json:"variantId" gorm:"index"`
+	Variant *ProductVariant `json:"variant,omitempty" gorm:"foreignKey:VariantId"`
 }
 
 type ProductVariant struct {
@@ -59,15 +62,7 @@ type ProductVariant struct {
 	Title string `json:"title"`
 	MinSelect int `json:"minSelect"`
 	MaxSelect int `json:"maxSelect"`
-	Items []VariantItem `json:"items,omitempty" gorm:"<-:create;foreignKey:VariantId"`
-}
-
-type VariantItem struct{
-	ID uint `json:"id" gorm:"primarykey"`
-	ProductId uint `json:"productId" gorm:"<-:create;index"`
-	Product Product `json:"product,omitempty" gorm:"<-:create;foreignKey:ProductId"`
-	VariantId uint `json:"variantId" gorm:"<-:create;index"`
-	Variant ProductVariant `json:"variant,omitempty" gorm:"<-:create;foreignKey:VariantId"`
+	Items []*Product `json:"items,omitempty" gorm:"many2many:product_variant_items;"`
 }
 
 type PurchaseProduct struct {
@@ -101,6 +96,5 @@ func Migration(db *gorm.DB) {
 	db.AutoMigrate(&Product{})
 	db.AutoMigrate(&ProductVariant{})
 	db.AutoMigrate(&PurchaseProduct{})
-	db.AutoMigrate(&VariantItem{})
 	db.AutoMigrate(&ProductDiscount{})
 }

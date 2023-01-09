@@ -107,8 +107,8 @@ func getBrands(c *gin.Context) {
 }
 
 type CreateCategorySchema struct {
-	CategoryId int `json:"categoryId" v:"required"`
-	BrandId int `json:"brandId" v:"required"`
+	CategoryId uint `json:"categoryId" v:"required"`
+	BrandId uint `json:"brandId" v:"required"`
 	Name string `json:"name" v:"min=3;max=50"`
 }
 

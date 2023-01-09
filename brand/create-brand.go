@@ -20,7 +20,7 @@ type CreateBrandSchema struct {
 	Email       string `json:"email" v:"required;email"`
 	Logo        string `json:"logo" v:"required"`
 	BannerImage string `json:"bannerImage" v:"required"`
-	PartnerId   int    `json:"partnerId" v:"required"`
+	PartnerId   uint    `json:"partnerId" v:"required"`
 	Address struct {
 		Address string `json:"address" v:"required"`
 		Area string `json:"area" v:"required"`
@@ -41,7 +41,7 @@ type CreateBrandSchema struct {
 			Minute int `json:"minute"`
 		} `json:"to" v:"required"`
 	} `json:"operatingTimes"`
-	HubId int `json:"hubId" v:"required"`
+	HubId uint `json:"hubId" v:"required"`
 }
 
 func createBrand(c *gin.Context) {

@@ -15,21 +15,21 @@ func CreateCategory(category ProductCategory) (ProductCategory, error) {
 
 
 // getCategoryById
-func GetCategoryById(id int) (ProductCategory, error) {
+func GetCategoryById(id uint) (ProductCategory, error) {
 	var category ProductCategory
 	err := db.Where("id = ?", id).First(&category).Error
 	return category, err
 }
 
 // updateCategory
-func UpdateCategoryById(id int, category ProductCategory) (ProductCategory, error) {
+func UpdateCategoryById(id uint, category ProductCategory) (ProductCategory, error) {
 	err := db.Model(&ProductCategory{}).Where("id = ?", id).Updates(category).Error
 	return category, err
 }
 
 
 // deleteCategory
-func DeleteCategoryById(id int) error {
+func DeleteCategoryById(id uint) error {
 	err := db.Delete(&ProductCategory{}, id).Error
 	return err
 }

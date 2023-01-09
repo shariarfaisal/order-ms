@@ -64,7 +64,7 @@ func getById(c *gin.Context) {
 		return
 	}
 
-	hub, err := GetById(id)
+	hub, err := GetById(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error": "Not found",

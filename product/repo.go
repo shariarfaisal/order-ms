@@ -16,7 +16,7 @@ func GetByName(name string) (product Product, err error) {
 	return product, err
 }
 
-func GetByNameAndBrandId(name string, brandId int) (product Product, err error) {
-	err = db.Where("name = ? AND brand_id = ?", name, brandId).First(&product).Error
+func IsSameProductExists(name string, brandId uint) (product Product, err error) {
+	err = db.Where("name = ? AND brand_id = ? AND type = ? ", name, brandId, "single").First(&product).Error
 	return product, err
 }

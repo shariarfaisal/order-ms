@@ -1,6 +1,6 @@
 package hub
 
-func GetById(id int) (Hub, error) {
+func GetById(id uint) (Hub, error) {
 	var hub Hub
 	result := db.First(&hub, id)
 	return hub, result.Error

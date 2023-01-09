@@ -58,7 +58,7 @@ func (p *OperatingTimes) Scan(value interface{}) error {
 }
 
 type Brand struct {
-	ID 		int    `json:"id" gorm:"primaryKey"`
+	ID 		uint    `json:"id" gorm:"primaryKey"`
 	Name        string `json:"name"`
 	Slug        string `json:"slug"`
 	Type 	  BrandType `json:"type"`
@@ -69,20 +69,20 @@ type Brand struct {
 	Logo        string `json:"logo"`
 	BannerImage      string `json:"bannerImage"`
 	Rating 	float32 `json:"rating"`
-	PartnerId   int    `json:"partnerId"`
+	PartnerId   uint    `json:"partnerId"`
 	Partner     Partner `json:"-" gorm:"foreignKey:PartnerId"`
 	Prefix      string `json:"prefix"`
 	Status 	BrandStatus `json:"status"`
 	IsAvailable bool `json:"isAvailable"`
-	AddressId int `json:"addressId" gorm:"index"`
+	AddressId uint `json:"addressId" gorm:"index"`
 	Address BrandAddress `json:"-" gorm:"foreignKey:AddressId"`
 	OperatingTimes OperatingTimes `json:"operatingTimes,omitempty" gorm:"type:jsonb"`
-	HubId int `json:"hubId" gorm:"index"`
+	HubId uint `json:"hubId" gorm:"index"`
 	Hub hub.Hub `json:"-" gorm:"foreignKey:HubId"`
 }
 
 type BrandAddress struct {
-	ID int `json:"id" gorm:"primaryKey"`
+	ID uint `json:"id" gorm:"primaryKey"`
 	Address string `json:"address"`
 	Area string `json:"area"`
 	PostalCode string `json:"postal_code"`
