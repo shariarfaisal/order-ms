@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/shariarfaisal/order-ms/brand"
-	"github.com/shariarfaisal/order-ms/product"
+	"github.com/shariarfaisal/order-ms/pkg/brand"
+	"github.com/shariarfaisal/order-ms/pkg/product"
 )
 
 func isValidItemsForOrder(items []OrderItemSchema, prods []product.Product) (bool, string) {
@@ -51,17 +51,16 @@ func getOrderItems(params OrderSchema) ([]product.Product, error) {
 	if err != nil {
 		return nil, err
 	}
-	
+
 	_, errMsg := isValidItemsForOrder(items, prods)
 	if errMsg != "" {
 		return nil, errors.New(errMsg)
 	}
 
-	return prods,nil 
+	return prods, nil
 }
 
-
-func InBetweenHours (start /* start hour */, end /* end hour*/, hour, minute float32) bool {
+func InBetweenHours(start /* start hour */, end /* end hour*/, hour, minute float32) bool {
 	if minute > 0 {
 		hour += minute / 100
 	}
@@ -88,24 +87,24 @@ func isBrandsOperating(brands []brand.Brand) (bool, string) {
 
 		if len(opTime) > 0 {
 			day := time.Now().Day()
-	
+
 			times, exists := opTime[strconv.Itoa(day)]
 			if !exists {
 				return false, fmt.Sprintf("%s is not operating", item.Name)
 			}
-			
+
 			hour := float32(time.Now().Hour())
 			minute := float32(time.Now().Minute())
 			isOperating := false
 			for _, t := range times.([]brand.OperatingTime) {
-				from := t.From.Hour + t.From.Minute / 100
-				to := t.To.Hour + t.To.Minute / 100
+				from := t.From.Hour + t.From.Minute/100
+				to := t.To.Hour + t.To.Minute/100
 				if InBetweenHours(float32(from), float32(to), hour, minute) {
 					isOperating = true
 					break
 				}
 			}
-	
+
 			if !isOperating {
 				return false, fmt.Sprintf("%s is not operating", item.Name)
 			}

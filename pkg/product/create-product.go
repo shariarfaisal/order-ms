@@ -7,57 +7,55 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shariarfaisal/order-ms/brand"
-	"github.com/shariarfaisal/order-ms/utils"
+	"github.com/shariarfaisal/order-ms/pkg/brand"
+	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/validator"
 	"gorm.io/gorm"
 )
 
 type VariantItemSchema struct {
-	Name string `json:"name" v:"required;min=3;max=50"`
-	Images []string `json:"images"`
-	Details string `json:"details" v:"max=1000"`
-	Price float32 `json:"price" v:"required;min=0"`
-	UseInventory bool `json:"useInventory" v:"required"`
-	InventoryType InventoryType `json:"inventoryType" v:"enum=periodic,perpetual"`
-	Variants []VariantSchema `json:"variants"`
+	Name          string          `json:"name" v:"required;min=3;max=50"`
+	Images        []string        `json:"images"`
+	Details       string          `json:"details" v:"max=1000"`
+	Price         float32         `json:"price" v:"required;min=0"`
+	UseInventory  bool            `json:"useInventory" v:"required"`
+	InventoryType InventoryType   `json:"inventoryType" v:"enum=periodic,perpetual"`
+	Variants      []VariantSchema `json:"variants"`
 }
 
 type VariantSchema struct {
-	Title string `json:"title" v:"required;min=2;max=50"`
-	MinSelect int `json:"minSelect" v:"min=0"`
-	MaxSelect int `json:"maxSelect" v:"min=0"`
-	Items []VariantItemSchema `json:"items" v:"min=1"`
+	Title     string              `json:"title" v:"required;min=2;max=50"`
+	MinSelect int                 `json:"minSelect" v:"min=0"`
+	MaxSelect int                 `json:"maxSelect" v:"min=0"`
+	Items     []VariantItemSchema `json:"items" v:"min=1"`
 }
-
 
 type ProductSchema struct {
-	CategoryId uint `json:"categoryId" title:"Category" v:"required"`
-	Name string `json:"name" v:"required;min=3;max=50"`
-	Images []string `json:"images"`
-	Details string `json:"details" v:"max=1000"`
-	Price float32 `json:"price"`
-	BrandId uint `json:"brandId" v:"required"`
-	UseInventory bool `json:"useInventory" v:"required"`
-	InventoryType InventoryType `json:"inventoryType" v:"enum=periodic,perpetual"`
-	Variants []VariantSchema `json:"variants"`
+	CategoryId    uint            `json:"categoryId" title:"Category" v:"required"`
+	Name          string          `json:"name" v:"required;min=3;max=50"`
+	Images        []string        `json:"images"`
+	Details       string          `json:"details" v:"max=1000"`
+	Price         float32         `json:"price"`
+	BrandId       uint            `json:"brandId" v:"required"`
+	UseInventory  bool            `json:"useInventory" v:"required"`
+	InventoryType InventoryType   `json:"inventoryType" v:"enum=periodic,perpetual"`
+	Variants      []VariantSchema `json:"variants"`
 }
-
 
 func createVariantItem(param VariantItemSchema, variantId uint, brandId uint, tx *gorm.DB) error {
 	fmt.Println("Variant item created")
-	
+
 	product := Product{
-		Name: param.Name,
-		Details: param.Details,
-		Price: param.Price,
-		BrandId: brandId,
-		UseInventory: param.UseInventory,
+		Name:          param.Name,
+		Details:       param.Details,
+		Price:         param.Price,
+		BrandId:       brandId,
+		UseInventory:  param.UseInventory,
 		InventoryType: param.InventoryType,
-		Type: ProductTypeVariant,
-		Status: "active",
-		Stock: 0,
-		Images: []string{},
+		Type:          ProductTypeVariant,
+		Status:        "active",
+		Stock:         0,
+		Images:        []string{},
 	}
 
 	if param.Images != nil {
@@ -68,7 +66,7 @@ func createVariantItem(param VariantItemSchema, variantId uint, brandId uint, tx
 
 	if len(param.Variants) > 0 {
 		product.Type = ProductTypeVariant
-	}else {
+	} else {
 		product.Type = ProductTypeSingle
 	}
 
@@ -88,13 +86,12 @@ func createVariantItem(param VariantItemSchema, variantId uint, brandId uint, tx
 	return nil
 }
 
-
 func createVariant(variants []VariantSchema, product Product, tx *gorm.DB) error {
-	
+
 	for _, v := range variants {
 		variant := ProductVariant{
 			ProductId: product.ID,
-			Title: v.Title,
+			Title:     v.Title,
 			MinSelect: v.MinSelect,
 			MaxSelect: v.MaxSelect,
 		}
@@ -103,8 +100,8 @@ func createVariant(variants []VariantSchema, product Product, tx *gorm.DB) error
 		er := tx.Create(&variant).Error
 		fmt.Println("Variant created")
 		if er != nil {
-			return er 
-		} 
+			return er
+		}
 
 		if len(v.Items) > 0 {
 			for _, item := range v.Items {
@@ -118,7 +115,6 @@ func createVariant(variants []VariantSchema, product Product, tx *gorm.DB) error
 
 	return nil
 }
-
 
 func createProduct(c *gin.Context) {
 	var params ProductSchema
@@ -142,7 +138,7 @@ func createProduct(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": utils.ErrType{
 			"price": "Price not acceptable",
 		}})
-		return 
+		return
 	}
 
 	// check brand exists
@@ -172,20 +168,20 @@ func createProduct(c *gin.Context) {
 	}
 	// create product
 	data := Product{
-		Name: params.Name,
-		Slug: utils.GetSlug(params.Name+"-"+"-"+strconv.Itoa(int(params.BrandId))),
-		Details: params.Details,
-		Price: params.Price,
-		BrandId: params.BrandId,
-		CategoryId: params.CategoryId,
-		UseInventory: params.UseInventory,
+		Name:          params.Name,
+		Slug:          utils.GetSlug(params.Name + "-" + "-" + strconv.Itoa(int(params.BrandId))),
+		Details:       params.Details,
+		Price:         params.Price,
+		BrandId:       params.BrandId,
+		CategoryId:    params.CategoryId,
+		UseInventory:  params.UseInventory,
 		InventoryType: params.InventoryType,
-		Images: []string{},
-		Status: "active",
-		Stock: 0,
+		Images:        []string{},
+		Status:        "active",
+		Stock:         0,
 	}
 
-	er = db.Transaction(func (tx *gorm.DB) error {
+	er = db.Transaction(func(tx *gorm.DB) error {
 
 		if params.Images != nil {
 			for _, img := range params.Images {
@@ -195,17 +191,17 @@ func createProduct(c *gin.Context) {
 
 		if len(params.Variants) > 0 {
 			data.Type = ProductTypeVariant
-		}else {
+		} else {
 			data.Type = ProductTypeSingle
 		}
 
 		// create product
 		er := tx.Create(&data).Error
 		if er != nil {
-			return er 
+			return er
 		}
 
-		// Create variants 
+		// Create variants
 		fmt.Println("=============variant total", len(params.Variants))
 		if len(params.Variants) > 0 {
 			er = createVariant(params.Variants, data, tx)
@@ -214,15 +210,15 @@ func createProduct(c *gin.Context) {
 			}
 		}
 
-		return nil 
+		return nil
 	})
 
 	if er != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": er.Error(),
 		})
-		return 
+		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": data })
+	c.JSON(http.StatusOK, gin.H{"data": data})
 }

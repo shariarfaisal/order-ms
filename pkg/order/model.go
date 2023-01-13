@@ -3,12 +3,12 @@ package order
 import (
 	"time"
 
-	"github.com/shariarfaisal/order-ms/admin"
-	"github.com/shariarfaisal/order-ms/brand"
-	"github.com/shariarfaisal/order-ms/customer"
-	"github.com/shariarfaisal/order-ms/hub"
-	"github.com/shariarfaisal/order-ms/product"
-	"github.com/shariarfaisal/order-ms/rider"
+	"github.com/shariarfaisal/order-ms/pkg/admin"
+	"github.com/shariarfaisal/order-ms/pkg/brand"
+	"github.com/shariarfaisal/order-ms/pkg/customer"
+	"github.com/shariarfaisal/order-ms/pkg/hub"
+	"github.com/shariarfaisal/order-ms/pkg/product"
+	"github.com/shariarfaisal/order-ms/pkg/rider"
 	"gorm.io/gorm"
 )
 

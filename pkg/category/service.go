@@ -2,11 +2,9 @@ package category
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/shariarfaisal/order-ms/utils"
+	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/validator"
 )
-
-
 
 type CategorySchema struct {
 	Name  string `json:"name" v:"required;min=3;max=50"`

@@ -4,57 +4,55 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shariarfaisal/order-ms/brand"
-	"github.com/shariarfaisal/order-ms/customer"
+	"github.com/shariarfaisal/order-ms/pkg/brand"
+	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/validator"
 	"gorm.io/gorm"
 )
 
-type OrderItemSchema struct  {
-	Id int `json:"id" v:"required"`
+type OrderItemSchema struct {
+	Id       int `json:"id" v:"required"`
 	Quantity int `json:"quantity" v:"required;min=1;max=100"`
 }
 
 type OrderSchema struct {
-	Platform string `json:"platform" v:"required;enum=web,app"`
-	RiderNote string `json:"riderNote"`
-	Items []OrderItemSchema`json:"items" v:"required;min=1;"`
-	RestaurantNote string `json:"restaurantNote"`
-	AddressId int `json:"addressId" v:"required"`
-	PaymentMethod string `json:"paymentMethod" v:"required"`
-	Voucher string `json:"voucher" v:"required"`
+	Platform       string            `json:"platform" v:"required;enum=web,app"`
+	RiderNote      string            `json:"riderNote"`
+	Items          []OrderItemSchema `json:"items" v:"required;min=1;"`
+	RestaurantNote string            `json:"restaurantNote"`
+	AddressId      int               `json:"addressId" v:"required"`
+	PaymentMethod  string            `json:"paymentMethod" v:"required"`
+	Voucher        string            `json:"voucher" v:"required"`
 }
 
-
 /**
-	fetch products & products restaurant & Hub by items ids
-		- check products existence 
-		- check products status 
-		- check products inventory 
-		- check restaurant operating status
-		TODO check group restaurant validity
-		- Check hub order accepting or not 
-		- Check is order from multiple hub or not (validate)
-		- Calculate order items total price & discount
-	- Voucher Validation & calculate discount
-	- Get delivery charge
-	- Check payment Status 
+fetch products & products restaurant & Hub by items ids
+	- check products existence
+	- check products status
+	- check products inventory
+	- check restaurant operating status
+	TODO check group restaurant validity
+	- Check hub order accepting or not
+	- Check is order from multiple hub or not (validate)
+	- Calculate order items total price & discount
+- Voucher Validation & calculate discount
+- Get delivery charge
+- Check payment Status
 
-	TODO: Create Transaction
-		- Create Order
-		- Create Pickups
-		- Create Order Items
-		- Update inventory
-		- Update voucher info 
-		- Update Brands counter 
-		- Update Products counter
+TODO: Create Transaction
+	- Create Order
+	- Create Pickups
+	- Create Order Items
+	- Update inventory
+	- Update voucher info
+	- Update Brands counter
+	- Update Products counter
 
-	TODO: Send Notification
-		- Notify customer
-		- Notify restaurant
-		- Notify Operation
+TODO: Send Notification
+	- Notify customer
+	- Notify restaurant
+	- Notify Operation
 */
-
 
 func createOrder(c *gin.Context) {
 	var params OrderSchema
@@ -67,10 +65,10 @@ func createOrder(c *gin.Context) {
 	}
 
 	/**
-		- Input data validation (required, type, length, etc)
-		- Check customer validity (is customer exists, is customer active, etc)
-		- Check address validity (is address exists, is address valid etc)
-		- check operation status 
+	- Input data validation (required, type, length, etc)
+	- Check customer validity (is customer exists, is customer active, etc)
+	- Check address validity (is address exists, is address valid etc)
+	- check operation status
 	*/
 
 	_, err := customer.GetCustomerById(1)
@@ -109,10 +107,6 @@ func createOrder(c *gin.Context) {
 	// 	return
 	// }
 
-
-
-	
-
 	// orderObj := Order {
 	// 	Status: order.Status,
 	// 	Platform: order.Platform,
@@ -130,10 +124,10 @@ func createOrder(c *gin.Context) {
 	// 	PromoDiscount: order.PromoDiscount,
 	// }
 
-	db.Transaction(func (tx *gorm.DB) error {
+	db.Transaction(func(tx *gorm.DB) error {
 
-		// create order 
-		// create pickups 
+		// create order
+		// create pickups
 		// create order items
 
 		return nil
@@ -141,4 +135,3 @@ func createOrder(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Order Created"})
 }
-
