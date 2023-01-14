@@ -7,12 +7,15 @@ import (
 
 	"github.com/gin-gonic/gin"
 	dotEnv "github.com/joho/godotenv"
+	"github.com/shariarfaisal/order-ms/pkg/admin"
 	"github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
 	"github.com/shariarfaisal/order-ms/pkg/order"
 	"github.com/shariarfaisal/order-ms/pkg/product"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
+	"github.com/shariarfaisal/order-ms/pkg/section"
+	"github.com/shariarfaisal/order-ms/pkg/voucher"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -60,6 +63,9 @@ func main() {
 	brand.Migration(db)
 	product.Migration(db)
 	customer.Migration(db)
+	voucher.Migration(db)
+	section.Migration(db)
+	admin.Migration(db)
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {

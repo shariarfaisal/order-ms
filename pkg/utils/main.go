@@ -11,7 +11,6 @@ import (
 
 type ErrType map[string]interface{}
 
-
 func GetSlug(s string) string {
 	s = strings.ToLower(s)
 	s = strings.ReplaceAll(s, " ", "-")
@@ -28,7 +27,7 @@ func GetSlug(s string) string {
 	return s
 }
 
-// Hashing Password 
+// Hashing Password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	return string(bytes), err
@@ -39,3 +38,12 @@ func IsValidPassword(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
 }
+
+type Platform string
+
+const (
+	Web     Platform = "web"
+	Android Platform = "android"
+	IOS     Platform = "ios"
+	All     Platform = "all"
+)

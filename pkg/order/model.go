@@ -9,6 +9,7 @@ import (
 	"github.com/shariarfaisal/order-ms/pkg/hub"
 	"github.com/shariarfaisal/order-ms/pkg/product"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
+	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"gorm.io/gorm"
 )
 
@@ -24,14 +25,6 @@ const (
 	OrderCancelled  OrderStatus = "cancelled"
 )
 
-type Platform string
-
-const (
-	Web     Platform = "web"
-	Android Platform = "android"
-	IOS     Platform = "ios"
-)
-
 type Order struct {
 	ID              uint             `json:"id" gorm:"primaryKey;autoIncrement;uniqueIndex"`    // primary key
 	CreatedAt       time.Time        `json:"createdAt" gorm:"<-:create" gorm:"type:timestamp;"` // created at
@@ -40,7 +33,7 @@ type Order struct {
 	DeliveredTo     uint             `json:"deliveredTo" gorm:"<-:create"`
 	DeliveryAddress *DeliveryAddress `json:"deliveryAddress" gorm:"foreignKey:DeliveredTo;references:ID"`
 	Status          OrderStatus      `json:"status" gorm:"<-:create"`
-	Platform        Platform         `json:"platform" gorm:"<-:create"`
+	Platform        utils.Platform   `json:"platform" gorm:"<-:create"`
 	DispatchTime    string           `json:"dispatchedTime" gorm:"<-:create"`
 	RiderNote       string           `json:"riderNote" gorm:"<-:create"`
 	ConfirmedAt     time.Time        `json:"confirmedAt" gorm:"<-:create" gorm:"type:timestamp"`
@@ -217,9 +210,17 @@ type OrderRefund struct {
 }
 
 func Migration(db *gorm.DB) {
-	db.AutoMigrate(&Order{})
-	db.AutoMigrate(&Pickup{})
-	db.AutoMigrate(&OrderItem{})
-	db.AutoMigrate(&DeliveryAddress{})
-	db.AutoMigrate(&AssignedRider{})
+	db.AutoMigrate(
+		&Order{},
+		&Pickup{},
+		&OrderItem{},
+		&DeliveryAddress{},
+		&AssignedRider{},
+		&CartItem{},
+		&Cart{},
+		&OrderIssue{},
+		&RestaurantPenalty{},
+		&RiderPenalty{},
+		&OrderRefund{},
+	)
 }
