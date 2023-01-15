@@ -142,6 +142,10 @@ github.com/shariarfaisal/validator v1.2.1 h1:jf8IB8GGeDJGDqR9YsE7fPr0p/F1iZCfSWo
 github.com/shariarfaisal/validator v1.2.1/go.mod h1:ui2LZLIF/oN3hniKXIrc8w92uXPx8wXqD/JIhGBJMcc=
 github.com/shariarfaisal/validator v1.3.0 h1:0ZiTtmZJzLzrZ2lJQBQtRPaxm9dqAQ7uidIkbi+2gBM=
 github.com/shariarfaisal/validator v1.3.0/go.mod h1:ui2LZLIF/oN3hniKXIrc8w92uXPx8wXqD/JIhGBJMcc=
+github.com/shariarfaisal/validator v1.4.0 h1:ALvftPCTDX+ZvIN+zKyDXOmZlPT+1iVTbQEhkVd3UEk=
+github.com/shariarfaisal/validator v1.4.0/go.mod h1:ui2LZLIF/oN3hniKXIrc8w92uXPx8wXqD/JIhGBJMcc=
+github.com/shariarfaisal/validator v1.5.0 h1:hAyp5CjfHWpXRgAzX1wdpQnd4e76OB7DDKC98ExITkw=
+github.com/shariarfaisal/validator v1.5.0/go.mod h1:ui2LZLIF/oN3hniKXIrc8w92uXPx8wXqD/JIhGBJMcc=
 github.com/shopspring/decimal v0.0.0-20180709203117-cd690d0c9e24/go.mod h1:M+9NzErvs504Cn4c5DxATwIqPbtswREoFCre64PpcG4=
 github.com/shopspring/decimal v1.2.0 h1:abSATXmQEYyShuxI4/vyW3tV1MrKAJzCZ/0zLUXYbsQ=
 github.com/shopspring/decimal v1.2.0/go.mod h1:DKyhrW/HYNuLGql+MJL6WCR6knT2jwCFRcu2hWCYk4o=

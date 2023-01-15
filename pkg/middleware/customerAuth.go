@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"strings"
@@ -10,9 +9,8 @@ import (
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 )
 
-func AdminAuth(c *gin.Context) {
+func CustomerAuth(c *gin.Context) {
 	token := c.Request.Header.Get("Authorization")
-	fmt.Println(token)
 	if token == "" {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Token is missing",
@@ -30,6 +28,6 @@ func AdminAuth(c *gin.Context) {
 		return
 	}
 
-	c.Set("admin", payloads)
+	c.Set("customer", payloads)
 	c.Next()
 }

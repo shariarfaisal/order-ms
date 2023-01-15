@@ -22,4 +22,5 @@ func Init(database *gorm.DB, r *gin.Engine) {
 	{
 		roleGroup.POST("/create", createRole)
 	}
+
 }

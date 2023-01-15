@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strconv"
@@ -69,4 +70,38 @@ func (t *Timer) End(name string) {
 	delete(t.Logs, name)
 	duration := time.Since(start)
 	fmt.Println(name, "took", duration)
+}
+
+func ParseDate(date string) (d time.Time, err error) {
+	err = errors.New("Invalid Date Format")
+	d, err = time.Parse("2006-01-02", date)
+	if err == nil {
+		return
+	}
+	d, err = time.Parse("2006/01/02", date)
+	if err == nil {
+		return
+	}
+
+	d, err = time.Parse("2006-01-02 15:04:05", date)
+	if err == nil {
+		return
+	}
+
+	d, err = time.Parse("2006-01-02T15:04:05", date)
+	if err == nil {
+		return
+	}
+
+	d, err = time.Parse("2006-01-02T15:04:05Z", date)
+	if err == nil {
+		return
+	}
+
+	d, err = time.Parse("2006-01-02T15:04:05.000Z", date)
+	if err == nil {
+		return
+	}
+
+	return
 }

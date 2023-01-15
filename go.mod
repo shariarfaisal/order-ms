@@ -5,7 +5,7 @@ go 1.18
 require (
 	github.com/gin-gonic/gin v1.8.2
 	github.com/lib/pq v1.10.2
-	github.com/shariarfaisal/validator v1.3.0
+	github.com/shariarfaisal/validator v1.5.0
 	golang.org/x/crypto v0.4.0
 	gorm.io/driver/postgres v1.4.5
 	gorm.io/gorm v1.24.2
