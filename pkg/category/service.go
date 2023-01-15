@@ -4,7 +4,25 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/validator"
+	"gorm.io/gorm"
 )
+
+var db *gorm.DB
+
+func Init(database *gorm.DB, r *gin.Engine) {
+	db = database
+	Migration(db)
+
+	group := r.Group("/category")
+	{
+		group.GET("/", getCategories)
+		group.POST("/create", createCategory)
+		// group.GET("/categories/:id", getCategoryById)
+		// group.PUT("/categories/:id", updateCategory)
+		// group.DELETE("/categories/:id", deleteCategory)
+	}
+
+}
 
 type CategorySchema struct {
 	Name  string `json:"name" v:"required;min=3;max=50"`

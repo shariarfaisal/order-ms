@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -29,7 +30,7 @@ func GetSlug(s string) string {
 
 // Hashing Password
 func HashPassword(password string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 10)
 	return string(bytes), err
 }
 
@@ -47,3 +48,25 @@ const (
 	IOS     Platform = "ios"
 	All     Platform = "all"
 )
+
+type Timer struct {
+	Logs map[string]time.Time
+}
+
+func (t *Timer) Start(name string) {
+	if t.Logs == nil {
+		t.Logs = make(map[string]time.Time)
+	}
+	t.Logs[name] = time.Now()
+}
+
+func (t *Timer) End(name string) {
+	start, is := t.Logs[name]
+	if !is {
+		fmt.Println("Start time not declared")
+		return
+	}
+	delete(t.Logs, name)
+	duration := time.Since(start)
+	fmt.Println(name, "took", duration)
+}

@@ -73,7 +73,7 @@ type OrderCharges struct {
 		Code           string  `json:"code"`
 		DiscountAmount float64 `json:"discountAmount"`
 		DiscountType   string  `json:"discountType"`
-	} `json:"voucher"`
+	} `json:"voucher" gorm:"type:jsonb"`
 	DeliveryCharge   float64 `json:"deliveryCharge"`
 	DeliveryDiscount float64 `json:"deliveryDiscount"`
 	TotalDiscount    float64 `json:"totalDiscount"`
@@ -149,13 +149,6 @@ type CartItem struct {
 	DeletedAt  gorm.DeletedAt     `json:"deleted_at"` // soft delete
 }
 
-type Cart struct {
-	gorm.Model
-	CustomerId uint               `json:"customer_id" gorm:"<-:create" gorm:"index"`
-	Customer   *customer.Customer `json:"customer" gorm:"<-:create;foreignKey:CustomerId;references:ID"`
-	Items      []*CartItem        `json:"items" gorm:"foreignKey:CartId;references:ID"`
-}
-
 type OrderIssue struct {
 	ID        uint           `json:"id" gorm:"primaryKey;autoIncrement;uniqueIndex"` // primary key
 	CreatedAt time.Time      `json:"createdAt" gorm:"type:timestamp;"`               // created at
@@ -217,7 +210,6 @@ func Migration(db *gorm.DB) {
 		&DeliveryAddress{},
 		&AssignedRider{},
 		&CartItem{},
-		&Cart{},
 		&OrderIssue{},
 		&RestaurantPenalty{},
 		&RiderPenalty{},

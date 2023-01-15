@@ -9,11 +9,13 @@ type Admin struct {
 	Password string `json:"password"`
 	Phone    string `json:"phone"`
 	Image    string `json:"image"`
+	RoleName string `json:"role_name" gorm:"column:role_name"`
+	Role     Role   `json:"role" gorm:"foreignKey:RoleName;references:Name"`
 }
 
 type Role struct {
 	ID   uint   `json:"id"`
-	Name string `json:"name"`
+	Name string `json:"name" gorm:"uniqueIndex;not null"`
 }
 
 func Migration(db *gorm.DB) {

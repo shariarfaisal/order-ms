@@ -57,24 +57,23 @@ func main() {
 	}
 
 	db = dbRes
-	order.Migration(db)
-	hub.Migration(db)
-	rider.Migration(db)
-	brand.Migration(db)
-	product.Migration(db)
-	customer.Migration(db)
-	voucher.Migration(db)
-	section.Migration(db)
-	admin.Migration(db)
 
 	r := gin.Default()
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
 
-	r.Use(JSONMiddleware())
+	admin.Init(db, r)
+	hub.Init(db, r)
+	order.Init(db, r)
+	rider.Init(db, r)
+	product.Init(db, r)
+	customer.Init(db, r)
+	voucher.Init(db, r)
+	section.Init(db, r)
+	brand.Init(db, r)
 
-	initRoutes(r)
+	r.Use(JSONMiddleware())
 
 	r.Run(":5000") // listen and serve on
 
