@@ -1,7 +1,6 @@
 package admin
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +18,7 @@ type CreateAdminSchema struct {
 }
 
 func createAdminUser(c *gin.Context) {
-	user, exists := c.Get("admin")
+	_, exists := c.Get("admin")
 	if !exists {
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Unauthorized",
@@ -27,7 +26,6 @@ func createAdminUser(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(user)
 	var payloads CreateAdminSchema
 	c.ShouldBindJSON(&payloads)
 
@@ -38,14 +36,6 @@ func createAdminUser(c *gin.Context) {
 		})
 		return
 	}
-
-	/*
-		is role  valid
-		is email exist
-		is phone exist
-		hash password
-		return
-	*/
 
 	adminUser := Admin{
 		Name:     payloads.Name,
@@ -67,7 +57,6 @@ func createAdminUser(c *gin.Context) {
 	}
 
 	emailExist, err := IsAdminExist("email", payloads.Email)
-	fmt.Println(emailExist, err)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),

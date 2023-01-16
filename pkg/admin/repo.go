@@ -16,7 +16,7 @@ func GetAdminByEmail(email string) (admin Admin, err error) {
 	return
 }
 
-func GetBy(key string, value string) (admin Admin, err error) {
+func GetBy(key string, value interface{}) (admin Admin, err error) {
 	err = db.Where(key+" = ?", value).First(&admin).Error
 	return
 }
