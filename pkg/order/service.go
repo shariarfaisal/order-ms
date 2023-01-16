@@ -8,7 +8,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shariarfaisal/order-ms/pkg/brand"
-	"github.com/shariarfaisal/order-ms/pkg/product"
 	"gorm.io/gorm"
 )
 
@@ -62,21 +61,21 @@ func Init(database *gorm.DB, r *gin.Engine) {
 	}
 }
 
-func isValidItemsForOrder(items []OrderItemSchema, prods []product.Product) (bool, string) {
+func isValidItemsForOrder(items []OrderItemSchema, prods []brand.Product) (bool, string) {
 	/*
 		- check products existence
 		- check products status
 		- check products inventory
 	*/
 
-	byId := map[int]product.Product{}
+	byId := map[int]brand.Product{}
 	for _, prod := range prods {
 		byId[int(prod.ID)] = prod
 	}
 
 	for _, item := range items {
 		prod, ok := byId[item.Id]
-		if !ok || prod.Status != product.ProductStatusApproved {
+		if !ok || prod.Status != brand.ProductStatusApproved {
 			return false, fmt.Sprintf("%s not found", prod.Name)
 		}
 
@@ -92,14 +91,16 @@ func isValidItemsForOrder(items []OrderItemSchema, prods []product.Product) (boo
 	return true, ""
 }
 
-func getOrderItems(params OrderSchema) ([]product.Product, error) {
+func getOrderItems(params OrderSchema) ([]brand.Product, error) {
+	productRepo := brand.NewProductRepo(db)
+
 	items := params.Items
 	itemsId := []int{}
 	for _, item := range items {
 		itemsId = append(itemsId, item.Id)
 	}
 
-	prods, err := product.GetByIds(itemsId)
+	prods, err := productRepo.GetByIds(itemsId)
 	if err != nil {
 		return nil, err
 	}

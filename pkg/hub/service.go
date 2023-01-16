@@ -15,7 +15,7 @@ var db *gorm.DB
 func Init(database *gorm.DB, r *gin.Engine) {
 	db = database
 	Migration(db)
-	hr := r.Group("/hub")
+	hr := r.Group("/hubs")
 	{
 		hr.GET("/", getMany)
 		hr.GET("/:id", getById)
@@ -64,16 +64,14 @@ func createHub(c *gin.Context) {
 		})
 		return
 	}
-	c.JSON(http.StatusCreated, gin.H{
-		"result": hubData,
-	})
+	c.JSON(http.StatusCreated, hubData)
 }
 
 func getById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err,
+			"error": "Invalid id",
 		})
 		return
 	}
@@ -87,9 +85,7 @@ func getById(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"result": hub,
-	})
+	c.JSON(http.StatusOK, hub)
 }
 
 func getMany(c *gin.Context) {
@@ -102,7 +98,5 @@ func getMany(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
-		"result": hubs,
-	})
+	c.JSON(http.StatusOK, hubs)
 }

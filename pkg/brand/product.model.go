@@ -1,10 +1,9 @@
-package product
+package brand
 
 import (
 	"time"
 
 	"github.com/lib/pq"
-	"github.com/shariarfaisal/order-ms/pkg/brand"
 	"gorm.io/gorm"
 )
 
@@ -31,37 +30,38 @@ const (
 )
 
 type Product struct {
-	ID            uint                `json:"id" gorm:"primarykey"`
-	Type          ProductType         `json:"type"`
-	Name          string              `json:"name"`
-	CategoryId    uint                `json:"categoryId" gorm:"index"`
-	Category      brand.BrandCategory `json:"category,omitempty" gorm:"foreignKey:CategoryId"`
-	Slug          string              `json:"slug"`
-	Images        pq.StringArray      `json:"image,omitempty" gorm:"type:text[]"`
-	Details       string              `json:"details"`
-	Price         float32             `json:"price"`
-	Status        ProductStatus       `json:"status"`
-	BrandId       uint                `json:"brandId" gorm:"index"`
-	Brand         brand.Brand         `json:"brand,omitempty" gorm:"foreignKey:BrandId"`
-	IsAvailable   bool                `json:"isAvailable"`
-	UseInventory  bool                `json:"useInventory"`
-	InventoryType InventoryType       `json:"inventoryType"`
-	Stock         int                 `json:"stock"`
-	Variants      []*ProductVariant   `json:"variants,omitempty" gorm:"foreignKey:ProductId"`
-	VariantId     uint                `json:"variantId" gorm:"index"`
-	Variant       *ProductVariant     `json:"variant,omitempty" gorm:"foreignKey:VariantId"`
+	gorm.Model
+	ID            uint             `json:"id" gorm:"primarykey"`
+	Type          ProductType      `json:"type"`
+	Name          string           `json:"name"`
+	CategoryId    uint             `json:"categoryId" gorm:"index"`
+	Category      BrandCategory    `json:"category,omitempty" gorm:"foreignKey:CategoryId"`
+	Slug          string           `json:"slug"`
+	Images        pq.StringArray   `json:"image,omitempty" gorm:"type:text[]"`
+	Details       string           `json:"details"`
+	Price         float32          `json:"price"`
+	Status        ProductStatus    `json:"status"`
+	BrandId       uint             `json:"brandId" gorm:"index"`
+	Brand         Brand            `json:"brand,omitempty" gorm:"foreignKey:BrandId"`
+	IsAvailable   bool             `json:"isAvailable"`
+	UseInventory  bool             `json:"useInventory"`
+	InventoryType InventoryType    `json:"inventoryType"`
+	Stock         int              `json:"stock"`
+	Variants      []ProductVariant `json:"variants,omitempty" gorm:"foreignKey:ProductId"`
+	VariantId     uint             `json:"variantId" gorm:"index"`
+	Variant       *ProductVariant  `json:"variant,omitempty" gorm:"foreignKey:VariantId"`
 }
 
 type ProductVariant struct {
-	ID        uint       `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time  `json:"createdAt"`
-	UpdatedAt time.Time  `json:"updatedAt"`
-	ProductId uint       `json:"productId" gorm:"index"`
-	Product   Product    `json:"-" gorm:"<-:create;foreignKey:ProductId"`
-	Title     string     `json:"title"`
-	MinSelect int        `json:"minSelect"`
-	MaxSelect int        `json:"maxSelect"`
-	Items     []*Product `json:"items,omitempty" gorm:"many2many:product_variant_items;"`
+	ID        uint      `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time `json:"createdAt"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	ProductId uint      `json:"productId" gorm:"index"`
+	Product   Product   `json:"-" gorm:"<-:create;foreignKey:ProductId"`
+	Title     string    `json:"title"`
+	MinSelect int       `json:"minSelect"`
+	MaxSelect int       `json:"maxSelect"`
+	Items     []Product `json:"items,omitempty" gorm:"many2many:product_variant_items;"`
 }
 
 type PurchaseProduct struct {
@@ -89,11 +89,4 @@ type ProductDiscount struct {
 	DiscountValue float64   `json:"discountValue"`
 	ValidFrom     time.Time `json:"validFrom" gorm:"<-:create;type:timestamp;default:CURRENT_TIMESTAMP"`
 	ValidTo       time.Time `json:"validTo" gorm:"<-:create;type:timestamp;default:CURRENT_TIMESTAMP"`
-}
-
-func Migration(db *gorm.DB) {
-	db.AutoMigrate(&Product{})
-	db.AutoMigrate(&ProductVariant{})
-	db.AutoMigrate(&PurchaseProduct{})
-	db.AutoMigrate(&ProductDiscount{})
 }

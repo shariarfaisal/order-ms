@@ -49,7 +49,7 @@ func (p *OperatingTimes) Scan(value interface{}) error {
 		return err
 	}
 
-	*p, ok = i.(OperatingTimes)
+	*p, ok = i.(map[string]interface{})
 	if !ok {
 		return errors.New("Type assertion OperatingTimes failed.")
 	}
@@ -99,4 +99,6 @@ func Migration(db *gorm.DB) {
 	db.AutoMigrate(&BrandCategory{})
 	db.AutoMigrate(&Partner{})
 	db.AutoMigrate(&PartnerUser{})
+	db.AutoMigrate(&ProductCategory{})
+	db.AutoMigrate(&Product{}, &ProductVariant{}, &PurchaseProduct{}, &ProductDiscount{})
 }

@@ -8,11 +8,10 @@ import (
 	"github.com/gin-gonic/gin"
 	dotEnv "github.com/joho/godotenv"
 	"github.com/shariarfaisal/order-ms/pkg/admin"
-	"github.com/shariarfaisal/order-ms/pkg/brand"
+	brandService "github.com/shariarfaisal/order-ms/pkg/brand/service"
 	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
 	"github.com/shariarfaisal/order-ms/pkg/order"
-	"github.com/shariarfaisal/order-ms/pkg/product"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
 	"github.com/shariarfaisal/order-ms/pkg/section"
 	"github.com/shariarfaisal/order-ms/pkg/voucher"
@@ -67,11 +66,10 @@ func main() {
 	hub.Init(db, r)
 	order.Init(db, r)
 	rider.Init(db, r)
-	product.Init(db, r)
 	customer.Init(db, r)
 	voucher.Init(db, r)
 	section.Init(db, r)
-	brand.Init(db, r)
+	brandService.Init(db, r)
 
 	r.Use(JSONMiddleware())
 

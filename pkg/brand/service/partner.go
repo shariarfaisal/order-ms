@@ -1,9 +1,10 @@
-package brand
+package service
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	Brand "github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/validator"
 	"gorm.io/gorm"
@@ -30,7 +31,7 @@ func createPartner(c *gin.Context) {
 		return
 	}
 
-	partner := Partner{
+	partner := Brand.Partner{
 		Name: params.Name,
 	}
 
@@ -48,14 +49,14 @@ func createPartner(c *gin.Context) {
 			return er
 		}
 
-		partnerUser := PartnerUser{
+		partnerUser := Brand.PartnerUser{
 			PartnerId: partner.ID,
 			Name:      params.UserName,
 			Email:     params.Email,
 			Phone:     params.Phone,
 			Password:  hashedPass,
-			Role:      PartnerRoleAdmin,
-			Status:    PartnerUserActive,
+			Role:      Brand.PartnerRoleAdmin,
+			Status:    Brand.PartnerUserActive,
 		}
 
 		er = db.Create(&partnerUser).Error
@@ -72,4 +73,16 @@ func createPartner(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, gin.H{"result": partner})
+}
+
+func getPartners(c *gin.Context) {
+	partnerRepo := Brand.NewPartnerRepo(db)
+
+	partners, err := partnerRepo.GetItems()
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"result": partners})
 }

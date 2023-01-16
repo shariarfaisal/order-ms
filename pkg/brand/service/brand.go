@@ -1,10 +1,11 @@
-package brand
+package service
 
 import (
 	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	Brand "github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/validator"
@@ -12,18 +13,18 @@ import (
 )
 
 type CreateBrandSchema struct {
-	Name        string    `json:"name" v:"required;min=3;max=50"`
-	Type        BrandType `json:"type" v:"required;enum=store,restaurant,grocery"`
-	Details     string    `json:"details"`
-	Phone       string    `json:"phone" v:"required;phone"`
-	Email       string    `json:"email" v:"required;email"`
-	Logo        string    `json:"logo" v:"required"`
-	BannerImage string    `json:"bannerImage" v:"required"`
-	PartnerId   uint      `json:"partnerId" v:"required"`
+	Name        string          `json:"name" v:"required;min=3;max=50"`
+	Type        Brand.BrandType `json:"type" v:"required;enum=store,restaurant,grocery"`
+	Details     string          `json:"details"`
+	Phone       string          `json:"phone" v:"required;phone"`
+	Email       string          `json:"email" v:"required;email"`
+	Logo        string          `json:"logo" v:"required"`
+	BannerImage string          `json:"bannerImage" v:"required"`
+	PartnerId   uint            `json:"partnerId" v:"required"`
 	Address     struct {
 		Address    string  `json:"address" v:"required"`
 		Area       string  `json:"area" v:"required"`
-		PostalCode string  `json:"postalCode" title:"Postal code" v:"required;eq='4'"`
+		PostalCode string  `json:"postalCode" title:"Postal code" v:"required;"`
 		Latitude   float64 `json:"latitude" v:"required"`
 		Longitude  float64 `json:"longitude" v:"required"`
 		Apartment  string  `json:"apartment"`
@@ -44,6 +45,8 @@ type CreateBrandSchema struct {
 }
 
 func createBrand(c *gin.Context) {
+	var partnerRepo = Brand.NewPartnerRepo(db)
+
 	var params CreateBrandSchema
 
 	if err := c.ShouldBindJSON(&params); err != nil {
@@ -63,21 +66,21 @@ func createBrand(c *gin.Context) {
 		return
 	}
 
-	_, partnerExists := GetPartnerById(params.PartnerId)
+	_, partnerExists := partnerRepo.GetById(params.PartnerId)
 	if partnerExists != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": map[string]string{"PartnerId": "Partner not found"}})
 		return
 	}
 
-	tx := db.Select(" name ").Where("hub_id = ? AND name = ?", params.HubId, params.Name).First(&Brand{})
+	tx := db.Select(" name ").Where("hub_id = ? AND name = ?", params.HubId, params.Name).First(&Brand.Brand{})
 	fmt.Println(tx.RowsAffected)
 	if tx.RowsAffected > 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": map[string]string{"Name": "Brand name already exists"}})
+		c.JSON(http.StatusBadRequest, gin.H{"error": map[string]string{"Name": "Brand already exists at this hub"}})
 		return
 	}
 
 	// copy params address to brand address
-	address := BrandAddress{
+	address := Brand.BrandAddress{
 		Address:    params.Address.Address,
 		Area:       params.Address.Area,
 		PostalCode: params.Address.PostalCode,
@@ -88,7 +91,7 @@ func createBrand(c *gin.Context) {
 		RoadNo:     params.Address.RoadNo,
 	}
 
-	brand := Brand{
+	brand := Brand.Brand{
 		Name:          params.Name,
 		Slug:          utils.GetSlug(params.Name),
 		Type:          params.Type,
@@ -100,7 +103,7 @@ func createBrand(c *gin.Context) {
 		BannerImage:   params.BannerImage,
 		Rating:        5,
 		PartnerId:     params.PartnerId,
-		Status:        BrandStatusPending,
+		Status:        Brand.BrandStatusPending,
 		IsAvailable:   false,
 		AddressId:     0,
 		HubId:         params.HubId,
@@ -109,9 +112,9 @@ func createBrand(c *gin.Context) {
 	if params.OperatingTimes != nil {
 		operatingTime := map[string]interface{}{}
 		for day, times := range params.OperatingTimes {
-			operatingTime[day] = []OperatingTime{}
+			operatingTime[day] = []Brand.OperatingTime{}
 			for _, time := range times {
-				operatingTime[day] = append(operatingTime[day].([]OperatingTime), OperatingTime{
+				operatingTime[day] = append(operatingTime[day].([]Brand.OperatingTime), Brand.OperatingTime{
 					From: time.From,
 					To:   time.To,
 				})
@@ -143,7 +146,7 @@ func createBrand(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"result": Brand{
+	c.JSON(http.StatusOK, Brand.Brand{
 		ID:          brand.ID,
 		Name:        brand.Name,
 		Slug:        brand.Slug,
@@ -152,5 +155,23 @@ func createBrand(c *gin.Context) {
 		Logo:        brand.Logo,
 		BannerImage: brand.BannerImage,
 		Address:     address,
-	}})
+	})
+}
+
+func getBrands(c *gin.Context) {
+	brandRepo := Brand.NewBrandRepo(db)
+
+	brands, err := brandRepo.GetItems()
+	if err != nil {
+		c.JSON(400, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, gin.H{"result": brands})
+}
+
+func getByIds(ids []int) []Brand.Brand {
+	var brands []Brand.Brand
+	db.Where("id IN ?", ids).Find(&brands)
+	return brands
 }

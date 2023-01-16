@@ -7,7 +7,6 @@ import (
 	"github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
-	"github.com/shariarfaisal/order-ms/pkg/product"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"gorm.io/gorm"
@@ -106,16 +105,16 @@ type Pickup struct {
 
 type OrderItem struct {
 	gorm.Model
-	ProductId uint             `json:"product_id" gorm:"<-:create" gorm:"index"`
-	Product   *product.Product `json:"product" gorm:"<-:create;foreignKey:ProductId;references:ID"`
-	Quantity  int              `json:"quantity" gorm:"<-:create"`
-	SaleUnit  float64          `json:"sale_unit" gorm:"<-:create"`
-	Total     float64          `json:"total" gorm:"<-:create"`
-	Discount  float64          `json:"discount" gorm:"<-:create"`
-	PickupId  uint             `json:"pickup_id" gorm:"<-:create" gorm:"index"`
-	Pickup    *Pickup          `json:"pickup" gorm:"foreignKey:PickupId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	OrderId   uint             `json:"order_id" gorm:"<-:create" gorm:"index"`
-	Order     *Order           `json:"order" gorm:"foreignKey:OrderId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	ProductId uint           `json:"product_id" gorm:"<-:create" gorm:"index"`
+	Product   *brand.Product `json:"product" gorm:"<-:create;foreignKey:ProductId;references:ID"`
+	Quantity  int            `json:"quantity" gorm:"<-:create"`
+	SaleUnit  float64        `json:"sale_unit" gorm:"<-:create"`
+	Total     float64        `json:"total" gorm:"<-:create"`
+	Discount  float64        `json:"discount" gorm:"<-:create"`
+	PickupId  uint           `json:"pickup_id" gorm:"<-:create" gorm:"index"`
+	Pickup    *Pickup        `json:"pickup" gorm:"foreignKey:PickupId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	OrderId   uint           `json:"order_id" gorm:"<-:create" gorm:"index"`
+	Order     *Order         `json:"order" gorm:"foreignKey:OrderId;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
 }
 
 type DeliveryAddress struct {
@@ -143,7 +142,7 @@ type CartItem struct {
 	CustomerId uint               `json:"user_id"`
 	Customer   *customer.Customer `json:"customer" gorm:"<-:create;foreignKey:CustomerId;references:ID"`
 	ProductId  uint               `json:"product_id"`
-	Product    *product.Product   `json:"product" gorm:"<-:create;foreignKey:ProductId;references:ID"`
+	Product    *brand.Product     `json:"product" gorm:"<-:create;foreignKey:ProductId;references:ID"`
 	CreatedAt  time.Time          `json:"created_at" gorm:"autoCreateTime"`
 	UpdatedAt  time.Time          `json:"updated_at" gorm:"autoUpdateTime"`
 	DeletedAt  gorm.DeletedAt     `json:"deleted_at"` // soft delete

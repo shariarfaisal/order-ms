@@ -1,4 +1,4 @@
-package product
+package service
 
 import (
 	"fmt"
@@ -9,18 +9,18 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
-	"github.com/shariarfaisal/validator"
+	"github.com/shariarfaisal/order-ms/pkg/validator"
 	"gorm.io/gorm"
 )
 
 type VariantItemSchema struct {
-	Name          string          `json:"name" v:"required;min=3;max=50"`
-	Images        []string        `json:"images"`
-	Details       string          `json:"details" v:"max=1000"`
-	Price         float32         `json:"price" v:"required;min=0"`
-	UseInventory  bool            `json:"useInventory" v:"required"`
-	InventoryType InventoryType   `json:"inventoryType" v:"enum=periodic,perpetual"`
-	Variants      []VariantSchema `json:"variants"`
+	Name          string              `json:"name" v:"required;min=3;max=50"`
+	Images        []string            `json:"images"`
+	Details       string              `json:"details" v:"max=1000"`
+	Price         float32             `json:"price" v:"required;min=0"`
+	UseInventory  bool                `json:"useInventory" v:"required"`
+	InventoryType brand.InventoryType `json:"inventoryType" v:"enum=periodic,perpetual"`
+	Variants      []VariantSchema     `json:"variants"`
 }
 
 type VariantSchema struct {
@@ -31,31 +31,31 @@ type VariantSchema struct {
 }
 
 type ProductSchema struct {
-	CategoryId    uint            `json:"categoryId" title:"Category" v:"required"`
-	Name          string          `json:"name" v:"required;min=3;max=50"`
-	Images        []string        `json:"images"`
-	Details       string          `json:"details" v:"max=1000"`
-	Price         float32         `json:"price"`
-	BrandId       uint            `json:"brandId" v:"required"`
-	UseInventory  bool            `json:"useInventory" v:"required"`
-	InventoryType InventoryType   `json:"inventoryType" v:"enum=periodic,perpetual"`
-	Variants      []VariantSchema `json:"variants"`
+	CategoryId    uint                `json:"categoryId" title:"Category" v:"required"`
+	Name          string              `json:"name" v:"required;min=3;max=50"`
+	Images        []string            `json:"images"`
+	Details       string              `json:"details" v:"max=1000"`
+	Price         float32             `json:"price"`
+	BrandId       uint                `json:"brandId" v:"required"`
+	UseInventory  bool                `json:"useInventory" v:"required"`
+	InventoryType brand.InventoryType `json:"inventoryType" v:"enum=periodic,perpetual"`
+	Variants      []VariantSchema     `json:"variants"`
 }
 
 func createVariantItem(param VariantItemSchema, variantId uint, brandId uint, tx *gorm.DB) error {
-	fmt.Println("Variant item created")
 
-	product := Product{
+	product := brand.Product{
 		Name:          param.Name,
 		Details:       param.Details,
 		Price:         param.Price,
 		BrandId:       brandId,
 		UseInventory:  param.UseInventory,
 		InventoryType: param.InventoryType,
-		Type:          ProductTypeVariant,
+		Type:          brand.ProductTypeVariant,
 		Status:        "active",
 		Stock:         0,
 		Images:        []string{},
+		VariantId:     variantId,
 	}
 
 	if param.Images != nil {
@@ -65,9 +65,9 @@ func createVariantItem(param VariantItemSchema, variantId uint, brandId uint, tx
 	}
 
 	if len(param.Variants) > 0 {
-		product.Type = ProductTypeVariant
+		product.Type = brand.ProductTypeVariant
 	} else {
-		product.Type = ProductTypeSingle
+		product.Type = brand.ProductTypeSingle
 	}
 
 	// create product
@@ -86,10 +86,10 @@ func createVariantItem(param VariantItemSchema, variantId uint, brandId uint, tx
 	return nil
 }
 
-func createVariant(variants []VariantSchema, product Product, tx *gorm.DB) error {
+func createVariant(variants []VariantSchema, product brand.Product, tx *gorm.DB) error {
 
 	for _, v := range variants {
-		variant := ProductVariant{
+		variant := brand.ProductVariant{
 			ProductId: product.ID,
 			Title:     v.Title,
 			MinSelect: v.MinSelect,
@@ -117,6 +117,10 @@ func createVariant(variants []VariantSchema, product Product, tx *gorm.DB) error
 }
 
 func createProduct(c *gin.Context) {
+	productRepo := brand.NewProductRepo(db)
+	categoryRepo := brand.NewBrandCategoryRepo(db)
+	brandRepo := brand.NewBrandRepo(db)
+
 	var params ProductSchema
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -142,14 +146,14 @@ func createProduct(c *gin.Context) {
 	}
 
 	// check brand exists
-	_, er := brand.GetBrandById(params.BrandId)
+	_, er := brandRepo.GetById(params.BrandId)
 	if er != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Brand not found"})
 		return
 	}
 
 	// check category exists in brand
-	cat, er := brand.GetCategoryById(params.CategoryId)
+	cat, er := categoryRepo.GetById(params.CategoryId)
 	if er != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
 		return
@@ -161,13 +165,13 @@ func createProduct(c *gin.Context) {
 	}
 
 	// check same name, same brand exists
-	_, er = IsSameProductExists(params.Name, params.BrandId)
+	_, er = productRepo.GetByNameAndBrandId(params.Name, params.BrandId)
 	if er == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Product with same name already exists"})
 		return
 	}
 	// create product
-	data := Product{
+	data := brand.Product{
 		Name:          params.Name,
 		Slug:          utils.GetSlug(params.Name + "-" + "-" + strconv.Itoa(int(params.BrandId))),
 		Details:       params.Details,
@@ -190,9 +194,9 @@ func createProduct(c *gin.Context) {
 		}
 
 		if len(params.Variants) > 0 {
-			data.Type = ProductTypeVariant
+			data.Type = brand.ProductTypeVariant
 		} else {
-			data.Type = ProductTypeSingle
+			data.Type = brand.ProductTypeSingle
 		}
 
 		// create product
@@ -219,4 +223,27 @@ func createProduct(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": data})
+}
+
+func getProducts(c *gin.Context) {
+	var products []brand.Product
+	if er := db.Preload("Variants").Find(&products).Error; er != nil {
+		c.JSON(500, gin.H{"error": er.Error()})
+		return
+	}
+	c.JSON(200, products)
+}
+
+func deleteProduct(c *gin.Context) {
+	var product brand.Product
+	id := c.Param("id")
+	if er := db.First(&product, id).Error; er != nil {
+		c.JSON(500, gin.H{"error": "Product not found"})
+		return
+	}
+	if er := db.Delete(&product).Error; er != nil {
+		c.JSON(500, gin.H{"error": er.Error()})
+		return
+	}
+	c.JSON(200, gin.H{"message": "Product deleted successfully"})
 }

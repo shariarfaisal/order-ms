@@ -1,28 +1,11 @@
-package category
+package service
 
 import (
 	"github.com/gin-gonic/gin"
+	Brand "github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
-	"github.com/shariarfaisal/validator"
-	"gorm.io/gorm"
+	"github.com/shariarfaisal/order-ms/pkg/validator"
 )
-
-var db *gorm.DB
-
-func Init(database *gorm.DB, r *gin.Engine) {
-	db = database
-	Migration(db)
-
-	group := r.Group("/category")
-	{
-		group.GET("/", getCategories)
-		group.POST("/create", createCategory)
-		// group.GET("/categories/:id", getCategoryById)
-		// group.PUT("/categories/:id", updateCategory)
-		// group.DELETE("/categories/:id", deleteCategory)
-	}
-
-}
 
 type CategorySchema struct {
 	Name  string `json:"name" v:"required;min=3;max=50"`
@@ -30,7 +13,9 @@ type CategorySchema struct {
 	Image string `json:"image" v:"required"`
 }
 
-func createCategory(c *gin.Context) {
+func createProductCategory(c *gin.Context) {
+	pCategoryRepo := Brand.NewProductCategoryRepo(db)
+
 	var params CategorySchema
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -43,7 +28,18 @@ func createCategory(c *gin.Context) {
 		return
 	}
 
-	category := ProductCategory{
+	exists, isErr := pCategoryRepo.IsExists("name", params.Name)
+	if isErr != nil {
+		c.JSON(400, gin.H{"error": isErr.Error()})
+		return
+	}
+
+	if exists {
+		c.JSON(400, gin.H{"error": "Category already exists"})
+		return
+	}
+
+	category := Brand.ProductCategory{
 		Name:  params.Name,
 		Slug:  utils.GetSlug(params.Name),
 		Icon:  params.Icon,
@@ -56,11 +52,12 @@ func createCategory(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, gin.H{"result": category})
+	c.JSON(200, category)
 }
 
-func getCategories(c *gin.Context) {
-	categories, err := GetCategories()
+func getProductCategories(c *gin.Context) {
+	pCategoryRepo := Brand.NewProductCategoryRepo(db)
+	categories, err := pCategoryRepo.GetItems()
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
