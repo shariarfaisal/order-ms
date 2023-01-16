@@ -25,7 +25,7 @@ func Init(database *gorm.DB, r *gin.Engine) {
 
 func getProducts(c *gin.Context) {
 	var products []Product
-	if er := db.Find(&products).Error; er != nil {
+	if er := db.Preload("Variants").Find(&products).Error; er != nil {
 		c.JSON(500, gin.H{"error": er.Error()})
 		return
 	}

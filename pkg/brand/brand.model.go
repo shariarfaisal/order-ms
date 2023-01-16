@@ -58,39 +58,39 @@ func (p *OperatingTimes) Scan(value interface{}) error {
 }
 
 type Brand struct {
-	ID             uint           `json:"id" gorm:"primaryKey"`
-	Name           string         `json:"name"`
-	Slug           string         `json:"slug"`
-	Type           BrandType      `json:"type"`
-	Details        string         `json:"details"`
-	Phone          string         `json:"phone"`
-	Email          string         `json:"email"`
-	EmailVerified  bool           `json:"emailVerified"`
-	Logo           string         `json:"logo"`
-	BannerImage    string         `json:"bannerImage"`
-	Rating         float32        `json:"rating"`
-	PartnerId      uint           `json:"partnerId"`
+	ID             uint           `json:"id,omitempty" gorm:"primaryKey"`
+	Name           string         `json:"name,omitempty"`
+	Slug           string         `json:"slug,omitempty"`
+	Type           BrandType      `json:"type,omitempty"`
+	Details        string         `json:"details,omitempty"`
+	Phone          string         `json:"phone,omitempty"`
+	Email          string         `json:"email,omitempty"`
+	EmailVerified  bool           `json:"emailVerified,omitempty"`
+	Logo           string         `json:"logo,omitempty"`
+	BannerImage    string         `json:"bannerImage,omitempty"`
+	Rating         float32        `json:"rating,omitempty"`
+	PartnerId      uint           `json:"partnerId,omitempty"`
 	Partner        Partner        `json:"-" gorm:"foreignKey:PartnerId"`
-	Prefix         string         `json:"prefix"`
-	Status         BrandStatus    `json:"status"`
-	IsAvailable    bool           `json:"isAvailable"`
-	AddressId      uint           `json:"addressId" gorm:"index"`
+	Prefix         string         `json:"prefix,omitempty"`
+	Status         BrandStatus    `json:"status,omitempty"`
+	IsAvailable    bool           `json:"isAvailable,omitempty"`
+	AddressId      uint           `json:"addressId,omitempty" gorm:"index"`
 	Address        BrandAddress   `json:"-" gorm:"foreignKey:AddressId"`
 	OperatingTimes OperatingTimes `json:"operatingTimes,omitempty" gorm:"type:jsonb"`
-	HubId          uint           `json:"hubId" gorm:"index"`
+	HubId          uint           `json:"hubId,omitempty" gorm:"index"`
 	Hub            hub.Hub        `json:"-" gorm:"foreignKey:HubId"`
 }
 
 type BrandAddress struct {
-	ID         uint    `json:"id" gorm:"primaryKey"`
-	Address    string  `json:"address"`
-	Area       string  `json:"area"`
-	PostalCode string  `json:"postal_code"`
-	Latitude   float64 `json:"latitude"`
-	Longitude  float64 `json:"longitude"`
-	Apartment  string  `json:"apartment"`
-	Floor      string  `json:"floor"`
-	RoadNo     string  `json:"road_no"`
+	ID         uint    `json:"id,omitempty" gorm:"primaryKey"`
+	Address    string  `json:"address,omitempty"`
+	Area       string  `json:"area,omitempty"`
+	PostalCode string  `json:"postalCode,omitempty"`
+	Latitude   float64 `json:"latitude,omitempty"`
+	Longitude  float64 `json:"longitude,omitempty"`
+	Apartment  string  `json:"apartment,omitempty"`
+	Floor      string  `json:"floor,omitempty"`
+	RoadNo     string  `json:"roadNo,omitempty"`
 }
 
 func Migration(db *gorm.DB) {

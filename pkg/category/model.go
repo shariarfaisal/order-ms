@@ -7,13 +7,13 @@ import (
 )
 
 type ProductCategory struct {
-	ID        uint `json:"id" gorm:"primarykey"`
-    CreatedAt time.Time `json:"createdAt"`
-    UpdatedAt time.Time `json:"updatedAt"`
-	Name  string `json:"name"`
-	Slug  string `json:"slug"`
-	Icon  string `json:"icon"`
-	Image string `json:"image"`
+	ID        uint      `json:"id,omitempty" gorm:"primarykey"`
+	CreatedAt time.Time `json:"createdAt,omitempty"`
+	UpdatedAt time.Time `json:"updatedAt,omitempty"`
+	Name      string    `json:"name,omitempty"`
+	Slug      string    `json:"slug,omitempty"`
+	Icon      string    `json:"icon,omitempty"`
+	Image     string    `json:"image,omitempty"`
 }
 
 func Migration(db *gorm.DB) {

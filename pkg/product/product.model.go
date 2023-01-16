@@ -57,7 +57,7 @@ type ProductVariant struct {
 	CreatedAt time.Time  `json:"createdAt"`
 	UpdatedAt time.Time  `json:"updatedAt"`
 	ProductId uint       `json:"productId" gorm:"index"`
-	Product   Product    `json:"product,omitempty" gorm:"<-:create;foreignKey:ProductId"`
+	Product   Product    `json:"-" gorm:"<-:create;foreignKey:ProductId"`
 	Title     string     `json:"title"`
 	MinSelect int        `json:"minSelect"`
 	MaxSelect int        `json:"maxSelect"`

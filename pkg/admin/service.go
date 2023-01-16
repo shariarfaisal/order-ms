@@ -10,12 +10,12 @@ var db *gorm.DB
 
 func Init(database *gorm.DB, r *gin.Engine) {
 	db = database
-	Migration(db)
 
 	adminGroup := r.Group("/admin")
 	{
 		adminGroup.POST("/create", middleware.AdminAuth, createAdminUser)
 		adminGroup.POST("/login", loginAdminUser)
+		adminGroup.GET("/me", middleware.AdminAuth, getProfile)
 	}
 
 	roleGroup := r.Group("/role")

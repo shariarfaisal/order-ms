@@ -201,8 +201,6 @@ func createProduct(c *gin.Context) {
 			return er
 		}
 
-		// Create variants
-		fmt.Println("=============variant total", len(params.Variants))
 		if len(params.Variants) > 0 {
 			er = createVariant(params.Variants, data, tx)
 			if er != nil {
