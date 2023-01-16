@@ -1,9 +1,7 @@
-package customer
+package market
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type CustomerStatus string
@@ -64,9 +62,4 @@ type CustomerAddress struct {
 	Apartment  string   `json:"apartment" gorm:"<-:create"`
 	Floor      string   `json:"floor" gorm:"<-:create"`
 	RoadNo     string   `json:"road_no" gorm:"<-:create"`
-}
-
-func Migration(db *gorm.DB) {
-	db.AutoMigrate(&Customer{})
-	db.AutoMigrate(&CustomerAddress{})
 }

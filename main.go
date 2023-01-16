@@ -9,11 +9,10 @@ import (
 	dotEnv "github.com/joho/godotenv"
 	"github.com/shariarfaisal/order-ms/pkg/admin"
 	brandService "github.com/shariarfaisal/order-ms/pkg/brand/service"
-	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
+	marketService "github.com/shariarfaisal/order-ms/pkg/market/service"
 	"github.com/shariarfaisal/order-ms/pkg/order"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
-	"github.com/shariarfaisal/order-ms/pkg/section"
 	"github.com/shariarfaisal/order-ms/pkg/voucher"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -66,10 +65,9 @@ func main() {
 	hub.Init(db, r)
 	order.Init(db, r)
 	rider.Init(db, r)
-	customer.Init(db, r)
 	voucher.Init(db, r)
-	section.Init(db, r)
 	brandService.Init(db, r)
+	marketService.Init(db, r)
 
 	r.Use(JSONMiddleware())
 

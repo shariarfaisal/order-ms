@@ -10,6 +10,16 @@ import (
 	"gorm.io/gorm"
 )
 
+type PartnerService struct {
+	Partner *Brand.PartnerRepo
+}
+
+func NewPartnerService(db *gorm.DB) *PartnerService {
+	return &PartnerService{
+		Partner: Brand.NewPartnerRepo(db),
+	}
+}
+
 type CreatePartnerSchema struct {
 	Name     string `json:"name" v:"required;min=3;max=50"`
 	UserName string `json:"userName" title:"User name" v:"required;min=3;max=50"`
@@ -18,7 +28,7 @@ type CreatePartnerSchema struct {
 	Password string `json:"password" v:"required;min=6;max=50"`
 }
 
-func createPartner(c *gin.Context) {
+func (s *PartnerService) createPartner(c *gin.Context) {
 	var params CreatePartnerSchema
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -75,10 +85,8 @@ func createPartner(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"result": partner})
 }
 
-func getPartners(c *gin.Context) {
-	partnerRepo := Brand.NewPartnerRepo(db)
-
-	partners, err := partnerRepo.GetItems()
+func (s *PartnerService) getPartners(c *gin.Context) {
+	partners, err := s.Partner.GetItems()
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return

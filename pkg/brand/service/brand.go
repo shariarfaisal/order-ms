@@ -12,6 +12,18 @@ import (
 	"gorm.io/gorm"
 )
 
+type BrandService struct {
+	Partner *Brand.PartnerRepo
+	Brand   *Brand.BrandRepo
+}
+
+func NewBrandService(db *gorm.DB) *BrandService {
+	return &BrandService{
+		Partner: Brand.NewPartnerRepo(db),
+		Brand:   Brand.NewBrandRepo(db),
+	}
+}
+
 type CreateBrandSchema struct {
 	Name        string          `json:"name" v:"required;min=3;max=50"`
 	Type        Brand.BrandType `json:"type" v:"required;enum=store,restaurant,grocery"`
@@ -44,9 +56,7 @@ type CreateBrandSchema struct {
 	HubId uint `json:"hubId" v:"required"`
 }
 
-func createBrand(c *gin.Context) {
-	var partnerRepo = Brand.NewPartnerRepo(db)
-
+func (s *BrandService) createBrand(c *gin.Context) {
 	var params CreateBrandSchema
 
 	if err := c.ShouldBindJSON(&params); err != nil {
@@ -66,7 +76,7 @@ func createBrand(c *gin.Context) {
 		return
 	}
 
-	_, partnerExists := partnerRepo.GetById(params.PartnerId)
+	_, partnerExists := s.Partner.GetById(params.PartnerId)
 	if partnerExists != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": map[string]string{"PartnerId": "Partner not found"}})
 		return
@@ -158,10 +168,8 @@ func createBrand(c *gin.Context) {
 	})
 }
 
-func getBrands(c *gin.Context) {
-	brandRepo := Brand.NewBrandRepo(db)
-
-	brands, err := brandRepo.GetItems()
+func (s *BrandService) getBrands(c *gin.Context) {
+	brands, err := s.Brand.GetItems()
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
@@ -170,7 +178,7 @@ func getBrands(c *gin.Context) {
 	c.JSON(200, gin.H{"result": brands})
 }
 
-func getByIds(ids []int) []Brand.Brand {
+func (s *BrandService) getByIds(ids []int) []Brand.Brand {
 	var brands []Brand.Brand
 	db.Where("id IN ?", ids).Find(&brands)
 	return brands

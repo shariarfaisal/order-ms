@@ -5,7 +5,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/shariarfaisal/order-ms/pkg/brand"
-	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/validator"
 	"gorm.io/gorm"
 )

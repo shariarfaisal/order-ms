@@ -13,6 +13,20 @@ import (
 	"gorm.io/gorm"
 )
 
+type ProductService struct {
+	Product       *brand.ProductRepo
+	Brand         *brand.BrandRepo
+	BrandCategory *brand.BrandCategoryRepo
+}
+
+func NewProductService(db *gorm.DB) *ProductService {
+	return &ProductService{
+		Product:       brand.NewProductRepo(db),
+		Brand:         brand.NewBrandRepo(db),
+		BrandCategory: brand.NewBrandCategoryRepo(db),
+	}
+}
+
 type VariantItemSchema struct {
 	Name          string              `json:"name" v:"required;min=3;max=50"`
 	Images        []string            `json:"images"`
@@ -116,10 +130,7 @@ func createVariant(variants []VariantSchema, product brand.Product, tx *gorm.DB)
 	return nil
 }
 
-func createProduct(c *gin.Context) {
-	productRepo := brand.NewProductRepo(db)
-	categoryRepo := brand.NewBrandCategoryRepo(db)
-	brandRepo := brand.NewBrandRepo(db)
+func (s *ProductService) createProduct(c *gin.Context) {
 
 	var params ProductSchema
 	if err := c.ShouldBindJSON(&params); err != nil {
@@ -146,14 +157,14 @@ func createProduct(c *gin.Context) {
 	}
 
 	// check brand exists
-	_, er := brandRepo.GetById(params.BrandId)
+	_, er := s.Brand.GetById(params.BrandId)
 	if er != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Brand not found"})
 		return
 	}
 
 	// check category exists in brand
-	cat, er := categoryRepo.GetById(params.CategoryId)
+	cat, er := s.BrandCategory.GetById(params.CategoryId)
 	if er != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Category not found"})
 		return
@@ -165,7 +176,7 @@ func createProduct(c *gin.Context) {
 	}
 
 	// check same name, same brand exists
-	_, er = productRepo.GetByNameAndBrandId(params.Name, params.BrandId)
+	_, er = s.Product.GetByNameAndBrandId(params.Name, params.BrandId)
 	if er == nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Product with same name already exists"})
 		return
@@ -225,7 +236,7 @@ func createProduct(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"data": data})
 }
 
-func getProducts(c *gin.Context) {
+func (s *ProductService) getProducts(c *gin.Context) {
 	var products []brand.Product
 	if er := db.Preload("Variants").Find(&products).Error; er != nil {
 		c.JSON(500, gin.H{"error": er.Error()})
@@ -234,7 +245,7 @@ func getProducts(c *gin.Context) {
 	c.JSON(200, products)
 }
 
-func deleteProduct(c *gin.Context) {
+func (s *ProductService) deleteProduct(c *gin.Context) {
 	var product brand.Product
 	id := c.Param("id")
 	if er := db.First(&product, id).Error; er != nil {

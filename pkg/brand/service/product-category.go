@@ -5,7 +5,18 @@ import (
 	Brand "github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/order-ms/pkg/validator"
+	"gorm.io/gorm"
 )
+
+type ProductCategoryService struct {
+	ProductCategory *Brand.ProductCategoryRepo
+}
+
+func NewProductCategoryService(db *gorm.DB) *ProductCategoryService {
+	return &ProductCategoryService{
+		ProductCategory: Brand.NewProductCategoryRepo(db),
+	}
+}
 
 type CategorySchema struct {
 	Name  string `json:"name" v:"required;min=3;max=50"`
@@ -13,9 +24,7 @@ type CategorySchema struct {
 	Image string `json:"image" v:"required"`
 }
 
-func createProductCategory(c *gin.Context) {
-	pCategoryRepo := Brand.NewProductCategoryRepo(db)
-
+func (s *ProductCategoryService) createProductCategory(c *gin.Context) {
 	var params CategorySchema
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -28,7 +37,7 @@ func createProductCategory(c *gin.Context) {
 		return
 	}
 
-	exists, isErr := pCategoryRepo.IsExists("name", params.Name)
+	exists, isErr := s.ProductCategory.IsExists("name", params.Name)
 	if isErr != nil {
 		c.JSON(400, gin.H{"error": isErr.Error()})
 		return
@@ -55,9 +64,8 @@ func createProductCategory(c *gin.Context) {
 	c.JSON(200, category)
 }
 
-func getProductCategories(c *gin.Context) {
-	pCategoryRepo := Brand.NewProductCategoryRepo(db)
-	categories, err := pCategoryRepo.GetItems()
+func (s *ProductCategoryService) getProductCategories(c *gin.Context) {
+	categories, err := s.ProductCategory.GetItems()
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return

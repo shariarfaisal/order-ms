@@ -7,7 +7,22 @@ import (
 	Brand "github.com/shariarfaisal/order-ms/pkg/brand"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"github.com/shariarfaisal/validator"
+	"gorm.io/gorm"
 )
+
+type BrandCategoryService struct {
+	ProductCategory *Brand.ProductCategoryRepo
+	BrandCategory   *Brand.BrandCategoryRepo
+	Brand           *Brand.BrandRepo
+}
+
+func NewBrandCategoryService(db *gorm.DB) *BrandCategoryService {
+	return &BrandCategoryService{
+		ProductCategory: Brand.NewProductCategoryRepo(db),
+		BrandCategory:   Brand.NewBrandCategoryRepo(db),
+		Brand:           Brand.NewBrandRepo(db),
+	}
+}
 
 type CreateCategorySchema struct {
 	CategoryId uint   `json:"categoryId" v:"required"`
@@ -15,11 +30,7 @@ type CreateCategorySchema struct {
 	Name       string `json:"name" v:"min=3;max=50"`
 }
 
-func createBrandCategory(c *gin.Context) {
-	pCategoryRepo := Brand.NewProductCategoryRepo(db)
-	bCategoryRepo := Brand.NewBrandCategoryRepo(db)
-	brandRepo := Brand.NewBrandRepo(db)
-
+func (s *BrandCategoryService) createBrandCategory(c *gin.Context) {
 	var params CreateCategorySchema
 	if err := c.ShouldBindJSON(&params); err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
@@ -32,7 +43,7 @@ func createBrandCategory(c *gin.Context) {
 	}
 
 	// is product category exists
-	cat, err := pCategoryRepo.GetById(params.CategoryId)
+	cat, err := s.ProductCategory.GetById(params.CategoryId)
 	if err != nil {
 		c.JSON(400, gin.H{"error": utils.ErrType{
 			"categoryId": "Category not found",
@@ -41,7 +52,7 @@ func createBrandCategory(c *gin.Context) {
 	}
 
 	// is category already exists
-	_, err = bCategoryRepo.GetByPCategoryId(params.CategoryId)
+	_, err = s.BrandCategory.GetByPCategoryId(params.CategoryId)
 	if err == nil {
 		c.JSON(400, gin.H{"error": utils.ErrType{
 			"categoryId": "Category already exists",
@@ -50,7 +61,7 @@ func createBrandCategory(c *gin.Context) {
 	}
 
 	// is brand exists
-	brand, err := brandRepo.GetById(params.BrandId)
+	brand, err := s.Brand.GetById(params.BrandId)
 	if err != nil {
 		c.JSON(400, gin.H{"error": utils.ErrType{
 			"brandId": "Brand not found",
@@ -80,10 +91,8 @@ func createBrandCategory(c *gin.Context) {
 	c.JSON(http.StatusCreated, gin.H{"result": categoryData})
 }
 
-func getBrandCategories(c *gin.Context) {
-	bCategoryRepo := Brand.NewBrandCategoryRepo(db)
-
-	categories, err := bCategoryRepo.GetItems()
+func (s *BrandCategoryService) getBrandCategories(c *gin.Context) {
+	categories, err := s.BrandCategory.GetItems()
 	if err != nil {
 		c.JSON(400, gin.H{"error": err.Error()})
 		return
