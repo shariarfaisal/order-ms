@@ -1,4 +1,4 @@
-package voucher
+package market
 
 import (
 	"time"
@@ -57,8 +57,4 @@ type Voucher struct {
 	UserMinOrderCount     int            `json:"user_min_order_count"`
 	UserMaxOrderCount     int            `json:"user_max_order_count"`
 	GeoJson               string         `json:"geo_json"`
-}
-
-func Migration(db *gorm.DB) {
-	db.AutoMigrate(&Voucher{})
 }

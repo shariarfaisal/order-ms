@@ -13,6 +13,7 @@ func Migration(db *gorm.DB) {
 	db.AutoMigrate(&market.Customer{})
 	db.AutoMigrate(&market.CustomerAddress{})
 	db.AutoMigrate(&market.Section{}, &market.SectionItem{})
+	db.AutoMigrate(&market.Voucher{})
 }
 
 func Init(database *gorm.DB, r *gin.Engine) {
@@ -40,5 +41,10 @@ func Init(database *gorm.DB, r *gin.Engine) {
 		sectionGroup.GET("/", sectionServices.getItems)
 		sectionGroup.PUT("/:id", sectionServices.update)
 		sectionGroup.DELETE("/:id", sectionServices.delete)
+	}
+
+	voucherGroup := r.Group("/vouchers")
+	{
+		voucherGroup.POST("/create")
 	}
 }
