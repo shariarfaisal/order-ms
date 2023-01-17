@@ -1,4 +1,4 @@
-package hub
+package service
 
 import (
 	"fmt"
@@ -6,22 +6,18 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/shariarfaisal/validator"
+	"github.com/shariarfaisal/order-ms/pkg/hub"
+	"github.com/shariarfaisal/order-ms/pkg/validator"
 	"gorm.io/gorm"
 )
 
-var db *gorm.DB
+type HubService struct {
+	Hub *hub.HubRepo
+}
 
-func Init(database *gorm.DB, r *gin.Engine) {
-	db = database
-	Migration(db)
-	hr := r.Group("/hubs")
-	{
-		hr.GET("/", getMany)
-		hr.GET("/:id", getById)
-		hr.POST("/create", createHub)
-		// hr.PUT("/:id", updateHub)
-		// hr.DELETE("/:id", deleteHub)
+func NewHubService(db *gorm.DB) *HubService {
+	return &HubService{
+		Hub: hub.NewHubRepo(db),
 	}
 }
 
@@ -35,7 +31,7 @@ type createDto struct {
 	Longitude float64 `json:"longitude" v:"required"`
 }
 
-func createHub(c *gin.Context) {
+func (s *HubService) createHub(c *gin.Context) {
 	var params createDto
 	c.ShouldBindJSON(&params)
 
@@ -47,7 +43,7 @@ func createHub(c *gin.Context) {
 		return
 	}
 
-	hubData := Hub{
+	hubData := hub.Hub{
 		Name:      params.Name,
 		City:      params.City,
 		Area:      params.Area,
@@ -67,7 +63,7 @@ func createHub(c *gin.Context) {
 	c.JSON(http.StatusCreated, hubData)
 }
 
-func getById(c *gin.Context) {
+func (s *HubService) getById(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -76,7 +72,7 @@ func getById(c *gin.Context) {
 		return
 	}
 
-	hub, err := GetById(uint(id))
+	hub, err := s.Hub.GetById(uint(id))
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error":  "Not found",
@@ -88,8 +84,8 @@ func getById(c *gin.Context) {
 	c.JSON(http.StatusOK, hub)
 }
 
-func getMany(c *gin.Context) {
-	hubs, err := GetMany()
+func (s *HubService) getMany(c *gin.Context) {
+	hubs, err := s.Hub.GetItems()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{
 			"error":  "Not found",

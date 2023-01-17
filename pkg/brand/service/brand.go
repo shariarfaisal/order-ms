@@ -15,12 +15,14 @@ import (
 type BrandService struct {
 	Partner *Brand.PartnerRepo
 	Brand   *Brand.BrandRepo
+	Hub     *hub.HubRepo
 }
 
 func NewBrandService(db *gorm.DB) *BrandService {
 	return &BrandService{
 		Partner: Brand.NewPartnerRepo(db),
 		Brand:   Brand.NewBrandRepo(db),
+		Hub:     hub.NewHubRepo(db),
 	}
 }
 
@@ -70,7 +72,7 @@ func (s *BrandService) createBrand(c *gin.Context) {
 		return
 	}
 
-	_, hubErr := hub.GetById(params.HubId)
+	_, hubErr := s.Hub.GetById(params.HubId)
 	if hubErr != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": map[string]string{"HubId": "Hub not found"}})
 		return
