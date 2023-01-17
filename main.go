@@ -7,13 +7,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 	dotEnv "github.com/joho/godotenv"
-	"github.com/shariarfaisal/order-ms/pkg/admin"
+	adminService "github.com/shariarfaisal/order-ms/pkg/admin/service"
+	brandService "github.com/shariarfaisal/order-ms/pkg/brand/service"
 	hubService "github.com/shariarfaisal/order-ms/pkg/hub/service"
 	marketService "github.com/shariarfaisal/order-ms/pkg/market/service"
 	orderService "github.com/shariarfaisal/order-ms/pkg/order/service"
-	"github.com/shariarfaisal/order-ms/pkg/rider"
-
-	brandService "github.com/shariarfaisal/order-ms/pkg/brand/service"
+	riderService "github.com/shariarfaisal/order-ms/pkg/rider/service"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -45,7 +44,7 @@ func main() {
 	sslMode := "disable"
 
 	if env == "production" {
-		sslMode = "require"
+		sslMode = ""
 	}
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s", host, user, password, dbName, port, sslMode)
@@ -57,19 +56,20 @@ func main() {
 	db = dbRes
 
 	r := gin.Default()
+	r.SetTrustedProxies([]string{"localhost"})
+
 	r.GET("/ping", func(c *gin.Context) {
 		c.String(http.StatusOK, "pong")
 	})
 
-	admin.Init(db, r)
+	adminService.Init(db, r)
 	hubService.Init(db, r)
 	orderService.Init(db, r)
-	rider.Init(db, r)
+	riderService.Init(db, r)
 	brandService.Init(db, r)
 	marketService.Init(db, r)
 
 	r.Use(JSONMiddleware())
 
 	r.Run(":5000") // listen and serve on
-
 }

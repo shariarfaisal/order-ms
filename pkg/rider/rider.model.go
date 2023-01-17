@@ -10,7 +10,3 @@ type Rider struct {
 	Type   string
 	Status string
 }
-
-func Migration(db *gorm.DB) {
-	db.AutoMigrate(&Rider{})
-}
