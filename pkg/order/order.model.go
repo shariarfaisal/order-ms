@@ -5,8 +5,8 @@ import (
 
 	"github.com/shariarfaisal/order-ms/pkg/admin"
 	"github.com/shariarfaisal/order-ms/pkg/brand"
-	"github.com/shariarfaisal/order-ms/pkg/customer"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
+	"github.com/shariarfaisal/order-ms/pkg/market"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
 	"github.com/shariarfaisal/order-ms/pkg/utils"
 	"gorm.io/gorm"
@@ -119,14 +119,14 @@ type OrderItem struct {
 
 type DeliveryAddress struct {
 	gorm.Model
-	Name       string             `json:"name" gorm:"<-:create"`
-	Phone      string             `json:"phone" gorm:"<-:create" gorm:"index"`
-	Address    string             `json:"address" gorm:"<-:create"`
-	Area       string             `json:"area" gorm:"<-:create"`
-	Lat        float64            `json:"lat" gorm:"<-:create"`
-	Lng        float64            `json:"lng" gorm:"<-:create"`
-	CustomerId uint               `json:"customer_id" gorm:"<-:create" gorm:"index"`
-	Customer   *customer.Customer `json:"customer" gorm:"<-:create;foreignKey:CustomerId;references:ID"`
+	Name       string           `json:"name" gorm:"<-:create"`
+	Phone      string           `json:"phone" gorm:"<-:create" gorm:"index"`
+	Address    string           `json:"address" gorm:"<-:create"`
+	Area       string           `json:"area" gorm:"<-:create"`
+	Lat        float64          `json:"lat" gorm:"<-:create"`
+	Lng        float64          `json:"lng" gorm:"<-:create"`
+	CustomerId uint             `json:"customer_id" gorm:"<-:create" gorm:"index"`
+	Customer   *market.Customer `json:"customer" gorm:"<-:create;foreignKey:CustomerId;references:ID"`
 }
 
 type AssignedRider struct {
@@ -137,15 +137,15 @@ type AssignedRider struct {
 }
 
 type CartItem struct {
-	ID         uint               `json:"id"`
-	Quantity   uint               `json:"quantity"`
-	CustomerId uint               `json:"user_id"`
-	Customer   *customer.Customer `json:"customer" gorm:"<-:create;foreignKey:CustomerId;references:ID"`
-	ProductId  uint               `json:"product_id"`
-	Product    *brand.Product     `json:"product" gorm:"<-:create;foreignKey:ProductId;references:ID"`
-	CreatedAt  time.Time          `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt  time.Time          `json:"updated_at" gorm:"autoUpdateTime"`
-	DeletedAt  gorm.DeletedAt     `json:"deleted_at"` // soft delete
+	ID         uint             `json:"id"`
+	Quantity   uint             `json:"quantity"`
+	CustomerId uint             `json:"user_id"`
+	Customer   *market.Customer `json:"customer" gorm:"<-:create;foreignKey:CustomerId;references:ID"`
+	ProductId  uint             `json:"product_id"`
+	Product    *brand.Product   `json:"product" gorm:"<-:create;foreignKey:ProductId;references:ID"`
+	CreatedAt  time.Time        `json:"created_at" gorm:"autoCreateTime"`
+	UpdatedAt  time.Time        `json:"updated_at" gorm:"autoUpdateTime"`
+	DeletedAt  gorm.DeletedAt   `json:"deleted_at"` // soft delete
 }
 
 type OrderIssue struct {
@@ -199,19 +199,4 @@ type OrderRefund struct {
 	Issue        *OrderIssue    `json:"issue" gorm:"foreignKey:IssueId;references:ID"`
 	RefundedById uint           `json:"refunded_by_id"`
 	RefundedBy   *admin.Admin   `json:"refunded" gorm:"foreignKey:RefundedById;references:ID"`
-}
-
-func Migration(db *gorm.DB) {
-	db.AutoMigrate(
-		&Order{},
-		&Pickup{},
-		&OrderItem{},
-		&DeliveryAddress{},
-		&AssignedRider{},
-		&CartItem{},
-		&OrderIssue{},
-		&RestaurantPenalty{},
-		&RiderPenalty{},
-		&OrderRefund{},
-	)
 }

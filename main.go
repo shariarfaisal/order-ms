@@ -8,11 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	dotEnv "github.com/joho/godotenv"
 	"github.com/shariarfaisal/order-ms/pkg/admin"
-	brandService "github.com/shariarfaisal/order-ms/pkg/brand/service"
 	"github.com/shariarfaisal/order-ms/pkg/hub"
 	marketService "github.com/shariarfaisal/order-ms/pkg/market/service"
-	"github.com/shariarfaisal/order-ms/pkg/order"
+	orderService "github.com/shariarfaisal/order-ms/pkg/order/service"
 	"github.com/shariarfaisal/order-ms/pkg/rider"
+
+	brandService "github.com/shariarfaisal/order-ms/pkg/brand/service"
 	"github.com/shariarfaisal/order-ms/pkg/voucher"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -63,7 +64,7 @@ func main() {
 
 	admin.Init(db, r)
 	hub.Init(db, r)
-	order.Init(db, r)
+	orderService.Init(db, r)
 	rider.Init(db, r)
 	voucher.Init(db, r)
 	brandService.Init(db, r)
